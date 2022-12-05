@@ -22,8 +22,9 @@ class FloorPlan {
                         if (i % fullBlockSize != blockSize && i % fullBlockSize != 0) {
                                 float buildingSize = rand() % 2 + 1;
                                 float buildingHeight = rand() % 25 + 1;
+                                float buildingDepth = rand() % 3 + 1;
                                 Building building = Building();
-                                building.updateParams(5, buildingSize, buildingHeight, i, k, rand() % numTextures);
+                                building.updateParams(5, buildingSize, buildingHeight, buildingDepth, i, k, rand() % numTextures);
                                 buildings.push_back(building);
 
                         }
