@@ -2,13 +2,14 @@
 #include "Cube.h"
 #include <iostream>
 
-void Building::updateParams(int param1, int size, int height, float x, float z) {
+void Building::updateParams(int param1, int size, int height, float x, float z, int texture) {
     m_vertexData = std::vector<float>();
     m_param1 = param1;
     m_size = size;
     m_height = height;
     m_x = x;
     m_z = z;
+    m_texture = texture;
     makeBuilding();
 }
 

@@ -4,6 +4,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <iostream>
+#include "floorplan.h"
 #include "settings.h"
 #include "shapes/Building.h"
 #include "utils/sceneparser.h"
@@ -82,8 +83,17 @@ void Realtime::initializeGL() {
     // Load shaders
     m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
 
-    m_building.updateParams(settings.shapeParameter1, 1, 2, 0, 0);
-    setupVBOVAO(&m_building_vbo, &m_building_vao, m_building.getMesh());
+    FloorPlan fp = FloorPlan(10.0f, 1);
+    buildings = fp.buildings;
+    for(int i = 0; i < buildings.size(); i++){
+        GLuint currVBO;
+        GLuint currVAO;
+        vbos.push_back(currVBO);
+        vaos.push_back(currVAO);
+        setupVBOVAO(&currVBO, &currVAO, buildings[i].getMesh());
+    }
+//    m_building.updateParams(settings.shapeParameter1, 1, 2, 0, 0);
+//    setupVBOVAO(&m_building_vbo, &m_building_vao, m_building.getMesh());
 
     QString brick_filepath = QString(":/resources/images/kitten.png");
     m_image = QImage(brick_filepath);
@@ -159,13 +169,16 @@ void Realtime::paintGL() {
 
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "proj"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
-
-    glBindVertexArray(m_building_vao);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_brick_texture);
-    glDrawArrays(GL_TRIANGLES, 0, m_building.getMesh().size() / 8);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindVertexArray(0);
+    for (int i = 0; i < buildings.size(); i++) {
+        Building m_building = buildings[i];
+        GLuint m_building_vao = vaos[i];
+        glBindVertexArray(m_building_vao);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_brick_texture);
+        glDrawArrays(GL_TRIANGLES, 0, m_building.getMesh().size() / 8);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindVertexArray(0);
+    }
 
     glUseProgram(0);
 }

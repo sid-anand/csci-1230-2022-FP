@@ -8,7 +8,7 @@
 class Building
 {
 public:
-    void updateParams(int param1, int size, int height, float x, float z);
+    void updateParams(int param1, int size, int height, float x, float z, int texture);
     std::vector<float> getMesh() { return m_vertexData; }
 
 private:

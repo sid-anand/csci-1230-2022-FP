@@ -87,7 +87,7 @@ private:
 
     QImage m_image;
     GLuint m_brick_texture;
-    Building m_building;
-    GLuint m_building_vbo;
-    GLuint m_building_vao;
+    std::vector<Building> buildings;
+    std::vector<GLuint> vbos;
+    std::vector<GLuint> vaos;
 };
