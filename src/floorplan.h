@@ -6,9 +6,11 @@
 class FloorPlan {
     public:
         std::vector<Building> buildings;
-        const int blockSize = 6.0f;
-        const int streetSize = 1.0f;
-        int fullBlockSize = blockSize + 2 * streetSize;
+        const int blockSize = 15;
+        const int buildingSize = 3;
+        const int streetSize = 2;
+        const int maxHeight = 10;
+//        int fullBlockSize = blockSize + 2 * streetSize;
         int gridSize;
         GLuint baseVBO;
         GLuint baseVAO;
@@ -16,19 +18,30 @@ class FloorPlan {
 
         FloorPlan(int size, int numTextures) {
             gridSize = size;
-
-            for (int k = -streetSize; k > -gridSize - (fullBlockSize/2); k -= (fullBlockSize/2)) {
-                for(int i = 0; i < gridSize + (fullBlockSize/2); i += streetSize){
-                        if (i % fullBlockSize != blockSize && i % fullBlockSize != 0) {
-                                float buildingSize = rand() % 2 + 1;
-                                float buildingHeight = rand() % 25 + 1;
-                                Building building = Building();
-                                building.updateParams(5, buildingSize, buildingHeight, i, k, rand() % numTextures);
-                                buildings.push_back(building);
-
+            for (int bi = 0; bi > - gridSize; bi -= (blockSize + streetSize)) {
+                for (int bk = 0; bk < gridSize; bk += blockSize + streetSize) {
+                    for (int k = 0; k > -blockSize; k -= (buildingSize + 1)) {
+                        for (int i = 0; i < gridSize; i += (buildingSize + 1)) {
+                            float buildingHeight = arc4random() % maxHeight + 1;
+                            Building building = Building();
+                            building.updateParams(5, buildingSize, buildingHeight, bi+i, bk+k, arc4random() % numTextures);
+                            buildings.push_back(building);
                         }
+                    }
                 }
             }
+//            for (int k = -streetSize; k > -gridSize - (fullBlockSize/2); k -= (fullBlockSize/2)) {
+//                for(int i = 0; i < gridSize + (fullBlockSize/2); i += streetSize){
+//                        if (i % fullBlockSize != blockSize && i % fullBlockSize != 0) {
+//                                float buildingSize = 2;
+//                                float buildingHeight = arc4random() % maxHeight + 1;
+//                                Building building = Building();
+//                                building.updateParams(5, buildingSize, buildingHeight, i, k, arc4random() % numTextures);
+//                                buildings.push_back(building);
+
+//                        }
+//                }
+//            }
         }
 
   /*Start by drawing the blocks
