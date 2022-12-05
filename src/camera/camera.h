@@ -34,9 +34,13 @@ public:
 
     glm::vec3 linearInterpolate(float t, glm::vec3 point1, glm::vec3 point2);
 
-    glm::vec3 calcBezierSegmentPoint(float t, glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4);
+    glm::vec3 calcBezierSegmentPoint(float t);
 
-    glm::vec3 calcBezierSegmentDirection(float t, glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4);
+    glm::vec3 calcBezierSegmentDirection(float t);
+
+    void moveAlongBezierCurve(float t);
+
+    void setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4);
 
 private:
     int m_width, m_height;
@@ -44,4 +48,8 @@ private:
     float m_nearPlane, m_farPlane;
     glm::vec4 m_pos, m_look, m_up;
     float m_speed = 5.0f;
+    glm::vec3 m_bezierPoint1;
+    glm::vec3 m_bezierPoint2;
+    glm::vec3 m_bezierPoint3;
+    glm::vec3 m_bezierPoint4;
 };

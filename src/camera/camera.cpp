@@ -105,23 +105,35 @@ glm::vec3 Camera::linearInterpolate(float t, glm::vec3 point1, glm::vec3 point2)
     return point1 * t + point2 * (1 -t);
 }
 
-glm::vec3 Camera::calcBezierSegmentPoint(float t, glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4) {
-    glm::vec3 interpolated12 = linearInterpolate(t, point1, point2);
-    glm::vec3 interpolated23 = linearInterpolate(t, point2, point3);
-    glm::vec3 interpolated34 = linearInterpolate(t, point3, point4);
+glm::vec3 Camera::calcBezierSegmentPoint(float t) {
+    glm::vec3 interpolated12 = linearInterpolate(t, m_bezierPoint1, m_bezierPoint2);
+    glm::vec3 interpolated23 = linearInterpolate(t, m_bezierPoint2, m_bezierPoint3);
+    glm::vec3 interpolated34 = linearInterpolate(t, m_bezierPoint3, m_bezierPoint4);
     glm::vec3 interpolated123 = linearInterpolate(t, interpolated12, interpolated23);
     glm::vec3 interpolated234 = linearInterpolate(t, interpolated23, interpolated34);
     glm::vec3 final = linearInterpolate(t, interpolated123, interpolated234);
     return final;
 }
 
-glm::vec3 Camera::calcBezierSegmentDirection(float t, glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4) {
+glm::vec3 Camera::calcBezierSegmentDirection(float t) {
     float tSquared = float(pow(t, 2));
-    glm::vec3 p1Vals = point1 * (-3.f * tSquared + 6.f * t - 3.f);
-    glm::vec3 p2Vals = point2 * ( 9.f * tSquared - 12.f * t + 3);
-    glm::vec3 p3Vals = point3 * (-9.f * tSquared + 6.f * t);
-    glm::vec3 p4Vals = point4 * ( 3.f * tSquared);
+    glm::vec3 p1Vals = m_bezierPoint1 * (-3.f * tSquared + 6.f * t - 3.f);
+    glm::vec3 p2Vals = m_bezierPoint2 * ( 9.f * tSquared - 12.f * t + 3);
+    glm::vec3 p3Vals = m_bezierPoint3 * (-9.f * tSquared + 6.f * t);
+    glm::vec3 p4Vals = m_bezierPoint4 * ( 3.f * tSquared);
     glm::vec3 derivative = p1Vals + p2Vals + p3Vals + p4Vals;
     glm::vec3 direction = glm::normalize(derivative);
     return direction;
+}
+
+void Camera::moveAlongBezierCurve(float t) {
+    m_pos = glm::vec4(calcBezierSegmentPoint(t), 1);
+    m_look = glm::vec4(calcBezierSegmentDirection(t), 1);
+}
+
+void Camera::setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4) {
+    m_bezierPoint1 = point1;
+    m_bezierPoint2 = point2;
+    m_bezierPoint3 = point3;
+    m_bezierPoint4 = point4;
 }
