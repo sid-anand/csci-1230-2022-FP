@@ -24,8 +24,19 @@ class FloorPlan {
                         for (int i = 0; i < gridSize; i += (buildingSize + 1)) {
                             float buildingHeight = arc4random() % maxHeight + 1;
                             Building building = Building();
-                            building.updateParams(5, buildingSize, buildingHeight, bi+i, bk+k, arc4random() % numTextures);
+                            building.updateParams(5, buildingSize, buildingHeight,buildingSize, bi+i, bk+k, arc4random() % numTextures);
                             buildings.push_back(building);
+
+//            for (int k = -streetSize; k > -gridSize - (fullBlockSize/2); k -= (fullBlockSize/2)) {
+//                for(int i = 0; i < gridSize + (fullBlockSize/2); i += streetSize){
+//                        if (i % fullBlockSize != blockSize && i % fullBlockSize != 0) {
+//                                float buildingSize = rand() % 2 + 1;
+//                                float buildingHeight = rand() % 25 + 1;
+//                                float buildingDepth = rand() % 3 + 1;
+//                                Building building = Building();
+//                                building.updateParams(5, buildingSize, buildingHeight, buildingDepth, i, k, rand() % numTextures);
+//                                buildings.push_back(building);
+
                         }
                     }
                 }

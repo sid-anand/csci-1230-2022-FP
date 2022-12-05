@@ -18,7 +18,7 @@ Camera::Camera(int width, int height, const SceneCameraData &cameraData, float n
 glm::mat4 Camera::getViewMatrix() {
     return glm::lookAt(glm::vec3(m_pos),
                        glm::vec3(m_pos + m_look),
-                       glm::vec3(m_up));
+                       -glm::vec3(m_up));
 }
 
 glm::mat4 Camera::getProjMatrix() {

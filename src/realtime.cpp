@@ -158,7 +158,7 @@ void Realtime::initializeGL() {
             30
     };
 
-    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, settings.farPlane);
+    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, 100.f);
 }
 
 void Realtime::paintGL() {
