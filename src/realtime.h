@@ -95,4 +95,6 @@ private:
     GLuint m_fbo;
     GLuint m_fbo_texture;
     GLuint m_fbo_renderbuffer;
+
+    float m_tBezier;
 };

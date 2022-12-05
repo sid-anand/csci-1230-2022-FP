@@ -102,7 +102,7 @@ void Camera::rotate(float deltaX, float deltaY) {
 }
 
 glm::vec3 Camera::linearInterpolate(float t, glm::vec3 point1, glm::vec3 point2) {
-    return point1 * t + point2 * (1 -t);
+    return point1 * (1 - t) + point2 * t;
 }
 
 glm::vec3 Camera::calcBezierSegmentPoint(float t) {
