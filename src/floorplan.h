@@ -5,30 +5,30 @@
 class FloorPlan {
 public:
 	std::vector<Building> buildings;
-    std::vector<std::string> textures;
+    	std::vector<std::string> textures;
 	const int blockSize = 6.0f;
 	const int streetSize = 1.0f;
-    int fullBlockSize = blockSize + 2 * streetSize;
+    	int fullBlockSize = blockSize + 2 * streetSize;
 	int gridSize;
 	GLuint baseVBO;
 	GLuint baseVAO;
 
   	
     FloorPlan(int size) {
-		gridSize = size;
+	gridSize = size;
 
-		for (int k = -streetSize; k > -gridSize - (fullBlockSize/2); k -= (fullBlockSize/2)) {
-            for(int i = 0; i < gridSize + (fullBlockSize/2); i += streetSize){
-                if (i % fullBlockSize != blockSize && i % fullBlockSize != 0) {
-                    float buildingSize = rand() % 2 + 1;
-                    float buildingHeight = rand() % 25 + 1;
-                    Building* building = Building(i, k, buildingSize, buildingHeight, textures[rand() % textures.size()]);
-                    buildings.push_back(building);
+	for (int k = -streetSize; k > -gridSize - (fullBlockSize/2); k -= (fullBlockSize/2)) {
+        	for(int i = 0; i < gridSize + (fullBlockSize/2); i += streetSize){
+                	if (i % fullBlockSize != blockSize && i % fullBlockSize != 0) {
+                    		float buildingSize = rand() % 2 + 1;
+                    		float buildingHeight = rand() % 25 + 1;
+                    		Building* building = Building(i, k, buildingSize, buildingHeight, textures[rand() % textures.size()]);
+                    		buildings.push_back(building);
 
-                }
-            }
+                	}
+           	}
         }
-  	}
+  }
 
   /*Start by drawing the blocks
   (The regions where the buildings will sit on top of)*/
@@ -39,8 +39,8 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, baseVBO);
 		glUseProgram(shader);
 		std::vector<float> data;
-        for(int j = 0; j < gridSize; j += 12){
-            for(int i = 0; i < gridSize; i += 12){
+        for(int j = 0; j < gridSize; j += fullBlockSize){
+        	for(int i = 0; i < gridSize; i += fullBlockSize){
 				// // bottom left
 				// data.push(0.0f + i);
 				// data.push(0.0f);
@@ -63,37 +63,37 @@ public:
 
 
 
-				// top left
-                data.push_back(0.0f + i);
-                data.push_back(0.0f);
-                data.push_back(0.0f - blockSize - j);
+			// top left
+			data.push_back(0.0f + i);
+			data.push_back(0.0f);
+			data.push_back(0.0f - blockSize - j);
 
-				// bottom left
-                data.push_back(0.0f + i);
-                data.push_back(0.0f);
-                data.push_back(0.0f - j);
+			// bottom left
+			data.push_back(0.0f + i);
+			data.push_back(0.0f);
+			data.push_back(0.0f - j);
 
-				// top right
-                data.push_back(0.0f + blockSize + i);
-                data.push_back(0.0f);
-                data.push_back(0.0f - blockSize - j);
+			// top right
+			data.push_back(0.0f + blockSize + i);
+			data.push_back(0.0f);
+			data.push_back(0.0f - blockSize - j);
 
-				// top right
-                data.push_back(0.0f + blockSize + i);
-                data.push_back(0.0f);
-                data.push_back(0.0f - blockSize - j);
+			// top right
+			data.push_back(0.0f + blockSize + i);
+			data.push_back(0.0f);
+			data.push_back(0.0f - blockSize - j);
 
-				// bottom left
-                data.push_back(0.0f + i);
-                data.push_back(0.0f);
-                data.push_back(0.0f - j);
+			// bottom left
+			data.push_back(0.0f + i);
+			data.push_back(0.0f);
+			data.push_back(0.0f - j);
 
-				// bottom right
-                data.push_back(0.0f + blockSize + i);
-                data.push_back(0.0f);
-                data.push_back(0.0f - j);
-			}
+			// bottom right
+			data.push_back(0.0f + blockSize + i);
+			data.push_back(0.0f);
+			data.push_back(0.0f - j);
 		}
+	}
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * data.size(), data.data(), GL_STATIC_DRAW);
         glGenVertexArrays(1, &baseVAO);
         glBindVertexArray(baseVAO);
@@ -105,33 +105,6 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, pow((gridSize / 12), 2));
         glBindVertexArray(0);
 		
-
-	// glColor4f(0.0, 0.0, 1.0, 1.0);//Now draw the outer boundaries
-	// glBegin(GL_LINES);//Start drawing lines. Let's start with the left boundary
-	
-	// //Bottom left corner of the map
-	// glVertex3f(-2.0f, 0.0f, 2.0f);
-	// //Top left corner of the map
-	// glVertex3f(-2.0f, 0.0f, -_size - 8);
-	
-	// /*Next, let's do the back boundary. 
-	// Continuing from where we left off, this is the top left corner of the map*/
-	// glVertex3f(-2.0f, 0.0f, -_size - 8);
-	// //Top right corner of the map
-	// glVertex3f(_size + 8, 0.0f, -_size - 8);
-
-	// //Right boundary: top right corner of the map
-	// glVertex3f(_size + 8, 0.0f, -_size - 8);
-	// //Bottom right corner of the map
-	// glVertex3f(_size + 8, 0.0f, 2.0f);
-
-	// //Front boundary: bottom right corner of the map
-	// glVertex3f(_size + 8, 0.0f, 2.0f);
-	// //Back to where we started: the bottom left corner of the map
-	// glVertex3f(-2.0f, 0.0f, 2.0f);
-
-	// glEnd();
-
 	//Draw Buildings
 	for(int i = 0; i < buildings.size(); i++){
 		Building currBuilding = buildings[i];
