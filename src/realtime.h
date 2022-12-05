@@ -2,6 +2,7 @@
 
 // Defined before including GLEW to suppress deprecation messages on macOS
 #include "camera/camera.h"
+#include "shapes/Building.h"
 #include "shapes/Cone.h"
 #include "shapes/Cube.h"
 #include "shapes/Cylinder.h"
@@ -84,15 +85,9 @@ private:
     GLuint m_sphere_vbo;
     GLuint m_sphere_vao;
 
-    GLuint m_defaultFBO;
-    int m_fbo_width;
-    int m_fbo_height;
-    int m_screen_width;
-    int m_screen_height;
-    GLuint m_texture_shader;
-    GLuint m_fullscreen_vbo;
-    GLuint m_fullscreen_vao;
-    GLuint m_fbo;
-    GLuint m_fbo_texture;
-    GLuint m_fbo_renderbuffer;
+    QImage m_image;
+    GLuint m_brick_texture;
+    Building m_building;
+    GLuint m_building_vbo;
+    GLuint m_building_vao;
 };

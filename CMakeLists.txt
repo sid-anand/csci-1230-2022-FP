@@ -36,6 +36,7 @@ add_executable(${PROJECT_NAME}
     src/shapes/Sphere.cpp
     src/shapes/Cylinder.cpp
     src/shapes/Cone.cpp
+    src/shapes/Building.cpp
     src/camera/camera.cpp
 
     src/mainwindow.h
@@ -50,6 +51,7 @@ add_executable(${PROJECT_NAME}
     src/shapes/Sphere.h
     src/shapes/Cylinder.h
     src/shapes/Cone.h
+    src/shapes/Building.h
     src/camera/camera.h
 )
 
@@ -79,6 +81,8 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
         resources/shaders/phong.vert
         resources/shaders/texture.frag
         resources/shaders/texture.vert
+        resources/images/building.jpg
+        resources/images/kitten.png
 )
 
 # GLEW: this provides support for Windows (including 64-bit)
