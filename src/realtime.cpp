@@ -153,7 +153,7 @@ void Realtime::initializeGL() {
 
     m_renderData.cameraData = SceneCameraData{
             glm::vec4(0, 0, 0, 1),
-            glm::vec4(-1, 0, 0, 0),
+            glm::vec4(1, 0, 0, 0),
             glm::vec4(0, 1, 0, 0),
             30
     };
