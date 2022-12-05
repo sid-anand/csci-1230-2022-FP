@@ -82,7 +82,7 @@ void Realtime::initializeGL() {
     // Load shaders
     m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
 
-    m_building.updateParams(settings.shapeParameter1, 1, 2);
+    m_building.updateParams(settings.shapeParameter1, 1, 2, 0, 0);
     setupVBOVAO(&m_building_vbo, &m_building_vao, m_building.getMesh());
 
     QString brick_filepath = QString(":/resources/images/kitten.png");
