@@ -82,8 +82,16 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
         resources/shaders/phong.vert
         resources/shaders/texture.frag
         resources/shaders/texture.vert
+        resources/shaders/skybox.frag
+        resources/shaders/skybox.vert
         resources/images/building.jpg
         resources/images/kitten.png
+        resources/images/front.png
+        resources/images/back.png
+        resources/images/left.png
+        resources/images/right.png
+        resources/images/bottom.png
+        resources/images/top.png
 )
 
 # GLEW: this provides support for Windows (including 64-bit)

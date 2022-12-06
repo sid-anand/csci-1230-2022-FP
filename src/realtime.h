@@ -58,6 +58,8 @@ private:
 
     // Additional methods / fields
     void setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh);
+    void setupSkybox();
+    void drawSkybox();
 
     RenderData m_renderData;
     Camera m_camera;
@@ -71,4 +73,8 @@ private:
     std::vector<Building> m_buildings;
     std::vector<GLuint> m_vbos;
     std::vector<GLuint> m_vaos;
+
+    GLuint m_skybox_shader;
+    GLuint m_skybox_vao, m_skybox_vbo, m_skybox_ebo;
+    GLuint m_cubemap_texture;
 };

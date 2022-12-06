@@ -80,6 +80,7 @@ void Realtime::initializeGL() {
 
     // Load shaders
     m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
+    m_skybox_shader = ShaderLoader::createShaderProgram(":/resources/shaders/skybox.vert", ":/resources/shaders/skybox.frag");
 
     FloorPlan fp = FloorPlan(10.0f, 1);
     m_buildings = fp.buildings;
@@ -91,7 +92,7 @@ void Realtime::initializeGL() {
         setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
     }
 
-    QString brick_filepath = QString(":/resources/images/kitten.png");
+    QString brick_filepath = QString(":/resources/images/building.jpg");
     m_image = QImage(brick_filepath);
     m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
     glGenTextures(1, &m_brick_texture);
@@ -106,9 +107,11 @@ void Realtime::initializeGL() {
     glUniform1i(glGetUniformLocation(m_phong_shader, "texture1"), 0);
     glUseProgram(0);
 
+    setupSkybox();
+
     m_renderData.cameraData = SceneCameraData{
             glm::vec4(0, 0, 0, 1),
-            glm::vec4(1, 0, 0, 0),
+            glm::vec4(0, 0, -1, 0),
             glm::vec4(0, 1, 0, 0),
             30
     };
@@ -120,6 +123,7 @@ void Realtime::paintGL() {
     // Students: anything requiring OpenGL calls every frame should be done here
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glUseProgram(m_phong_shader);
 
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
@@ -136,6 +140,9 @@ void Realtime::paintGL() {
     }
 
     glUseProgram(0);
+
+    // Draw skybox last for performance reasons
+    drawSkybox();
 }
 
 void Realtime::resizeGL(int w, int h) {
@@ -167,6 +174,120 @@ void Realtime::settingsChanged() {
     }
 
     update(); // asks for a PaintGL() call to occur
+}
+
+void Realtime::setupSkybox() {
+    std::vector<GLfloat> skyboxVertices =
+    {
+        //   Coordinates
+        -1.0f, -1.0f,  1.0f,//        7--------6
+         1.0f, -1.0f,  1.0f,//       /|       /|
+         1.0f, -1.0f, -1.0f,//      4--------5 |
+        -1.0f, -1.0f, -1.0f,//      | |      | |
+        -1.0f,  1.0f,  1.0f,//      | 3------|-2
+         1.0f,  1.0f,  1.0f,//      |/       |/
+         1.0f,  1.0f, -1.0f,//      0--------1
+        -1.0f,  1.0f, -1.0f
+    };
+
+    std::vector<GLuint> skyboxIndices =
+    {
+        // Right
+        1, 2, 6,
+        6, 5, 1,
+        // Left
+        0, 4, 7,
+        7, 3, 0,
+        // Top
+        4, 5, 6,
+        6, 7, 4,
+        // Bottom
+        0, 3, 2,
+        2, 1, 0,
+        // Back
+        0, 1, 5,
+        5, 4, 0,
+        // Front
+        3, 7, 6,
+        6, 2, 3
+    };
+
+    glGenVertexArrays(1, &m_skybox_vao);
+    glGenBuffers(1, &m_skybox_vbo);
+    glGenBuffers(1, &m_skybox_ebo);
+    glBindVertexArray(m_skybox_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_skybox_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * skyboxVertices.size(), skyboxVertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_skybox_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * skyboxIndices.size(), skyboxIndices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    std::string facesCubemap[6] =
+    {
+        ":/resources/images/right.png",
+        ":/resources/images/left.png",
+        ":/resources/images/top.png",
+        ":/resources/images/bottom.png",
+        ":/resources/images/front.png",
+        ":/resources/images/back.png"
+    };
+
+    glGenTextures(1, &m_cubemap_texture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap_texture);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    for (int i = 0; i < 6; i++) {
+        QImage image = QImage(QString(facesCubemap[i].c_str()));
+        image = image.convertToFormat(QImage::Format_RGBA8888); // not mirrored
+        glTexImage2D
+        (
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            0,
+            GL_RGBA,
+            image.width(),
+            image.height(),
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            image.bits()
+        );
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+    glUseProgram(m_skybox_shader);
+    glUniform1i(glGetUniformLocation(m_skybox_shader, "skybox"), 0);
+    glUseProgram(0);
+}
+
+void Realtime::drawSkybox() {
+    // Cubemap always has depth of 1.0, so we need GL_LEQUAL, not GL_LESS
+    glDepthFunc(GL_LEQUAL);
+
+    glUseProgram(m_skybox_shader);
+    // Get rid of last row/col to remove translation of skybox
+    glm::mat4 view = glm::mat4(glm::mat3(m_camera.getViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader, "view"), 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader, "projection"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
+
+    glDisable(GL_CULL_FACE);
+    glBindVertexArray(m_skybox_vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap_texture);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    glEnable(GL_CULL_FACE);
+
+    // Switch back to the normal depth function
+    glDepthFunc(GL_LESS);
 }
 
 void Realtime::setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh) {

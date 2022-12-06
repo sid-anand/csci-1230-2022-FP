@@ -75,12 +75,12 @@ void Camera::translate(CameraDirection dir, float deltaTime) {
 }
 
 void Camera::rotate(float deltaX, float deltaY) {
-    float thetaX = deltaX * M_PI / 3000;
+    float thetaX = deltaX * M_PI / 1000;
     glm::mat4 rotateX = glm::mat4(cos(thetaX), 0, -sin(thetaX), 0,
                                  0, 1, 0, 0,
                                  sin(thetaX), 0, cos(thetaX), 0,
                                  0, 0, 0, 1);
-    float thetaY = deltaY * M_PI / 3000;
+    float thetaY = deltaY * M_PI / 1000;
     glm::vec3 u = glm::normalize(glm::cross(glm::vec3(m_look), glm::vec3(m_up)));
     glm::mat4 rotateY = glm::mat4(cos(thetaY) + pow(u.x, 2) * (1 - cos(thetaY)),
                                   u.x * u.y * (1 - cos(thetaY)) + u.z * sin(thetaY),
