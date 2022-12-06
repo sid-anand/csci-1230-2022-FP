@@ -36,15 +36,13 @@ void Realtime::finish() {
 
     // Students: anything requiring OpenGL calls when the program exits should be done here
 
-    glDeleteBuffers(1, &m_cone_vbo);
-    glDeleteBuffers(1, &m_cube_vbo);
-    glDeleteBuffers(1, &m_cylinder_vbo);
-    glDeleteBuffers(1, &m_sphere_vbo);
+    for (GLuint vbo : m_vbos) {
+        glDeleteBuffers(1, &vbo);
+    }
 
-    glDeleteVertexArrays(1, &m_cone_vao);
-    glDeleteVertexArrays(1, &m_cube_vao);
-    glDeleteVertexArrays(1, &m_cylinder_vao);
-    glDeleteVertexArrays(1, &m_sphere_vao);
+    for (GLuint vao : m_vaos) {
+        glDeleteVertexArrays(1, &vao);
+    }
 
     glDeleteProgram(m_phong_shader);
 
@@ -84,16 +82,14 @@ void Realtime::initializeGL() {
     m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
 
     FloorPlan fp = FloorPlan(10.0f, 1);
-    buildings = fp.buildings;
-    for(int i = 0; i < buildings.size(); i++){
+    m_buildings = fp.buildings;
+    for(int i = 0; i < m_buildings.size(); i++){
         GLuint currVBO;
         GLuint currVAO;
-        vbos.push_back(currVBO);
-        vaos.push_back(currVAO);
-        setupVBOVAO(&currVBO, &currVAO, buildings[i].getMesh());
+        m_vbos.push_back(currVBO);
+        m_vaos.push_back(currVAO);
+        setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
     }
-//    m_building.updateParams(settings.shapeParameter1, 1, 2, 0, 0);
-//    setupVBOVAO(&m_building_vbo, &m_building_vao, m_building.getMesh());
 
     QString brick_filepath = QString(":/resources/images/kitten.png");
     m_image = QImage(brick_filepath);
@@ -109,47 +105,6 @@ void Realtime::initializeGL() {
     glUseProgram(m_phong_shader);
     glUniform1i(glGetUniformLocation(m_phong_shader, "texture1"), 0);
     glUseProgram(0);
-
-//    // Initialize meshes and VBOs/VAOs
-//    m_cone.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-//    setupVBOVAO(&m_cone_vbo, &m_cone_vao, m_cone.getMesh());
-
-//    m_cube.updateParams(settings.shapeParameter1);
-//    setupVBOVAO(&m_cube_vbo, &m_cube_vao, m_cube.getMesh());
-
-//    m_cylinder.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-//    setupVBOVAO(&m_cylinder_vbo, &m_cylinder_vao, m_cylinder.getMesh());
-
-//    m_sphere.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-//    setupVBOVAO(&m_sphere_vbo, &m_sphere_vao, m_sphere.getMesh());
-
-//    m_renderData.globalData = SceneGlobalData{0.5, 0.5, 0.5};
-
-//    m_renderData.lights.push_back(
-//                SceneLightData{
-//                    0,
-//                    LightType::LIGHT_DIRECTIONAL,
-//                    glm::vec4(1, 1, 1, 1),
-//                    glm::vec3(0),
-//                    glm::vec4(0),
-//                    glm::vec4(-3, -2, -1, 0)
-//                }
-//    );
-
-//    m_renderData.shapes.push_back(
-//                RenderShapeData{
-//                    ScenePrimitive{
-//                        PrimitiveType::PRIMITIVE_CUBE,
-//                        SceneMaterial{
-//                            glm::vec4(0, 0, 0, 1),
-//                            glm::vec4(1, 0, 0, 1),
-//                            glm::vec4(1, 1, 1, 1),
-//                            25
-//                        }
-//                    },
-//                    glm::mat4(1)
-//                }
-//    );
 
     m_renderData.cameraData = SceneCameraData{
             glm::vec4(0, 0, 0, 1),
@@ -169,13 +124,13 @@ void Realtime::paintGL() {
 
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "proj"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
-    for (int i = 0; i < buildings.size(); i++) {
-        Building m_building = buildings[i];
-        GLuint m_building_vao = vaos[i];
-        glBindVertexArray(m_building_vao);
+    for (int i = 0; i < m_buildings.size(); i++) {
+        Building building = m_buildings[i];
+        GLuint buildingVAO = m_vaos[i];
+        glBindVertexArray(buildingVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_brick_texture);
-        glDrawArrays(GL_TRIANGLES, 0, m_building.getMesh().size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, building.getMesh().size() / 8);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindVertexArray(0);
     }
@@ -211,18 +166,6 @@ void Realtime::settingsChanged() {
         m_camera.setPlanes(settings.nearPlane, settings.farPlane);
     }
 
-//    m_cone.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-//    m_cube.updateParams(settings.shapeParameter1);
-//    m_cylinder.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-//    m_sphere.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-
-//    makeCurrent();
-//    updateVBO(m_cone_vbo, m_cone.getMesh());
-//    updateVBO(m_cube_vbo, m_cube.getMesh());
-//    updateVBO(m_cylinder_vbo, m_cylinder.getMesh());
-//    updateVBO(m_sphere_vbo, m_sphere.getMesh());
-//    doneCurrent();
-
     update(); // asks for a PaintGL() call to occur
 }
 
@@ -249,12 +192,6 @@ void Realtime::setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh) 
     // Unbind VBO and VAO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-}
-
-void Realtime::updateVBO(GLuint vbo, std::vector<GLfloat> mesh) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * mesh.size(), mesh.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 // ================== Project 6: Action!
