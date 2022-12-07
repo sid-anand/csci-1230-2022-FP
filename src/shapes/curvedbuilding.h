@@ -1,11 +1,12 @@
-#ifndef BUILDING_H
-#define BUILDING_H
+#ifndef CURVEDBUILDING_H
+#define CURVEDBUILDING_H
+
 
 #include <vector>
 #include <glm/glm.hpp>
 
 
-class Building
+class CurvedBuilding
 {
 public:
     void updateParams(int param1, int size, int height, int depth, float x, float z, int texture);
@@ -26,5 +27,4 @@ private:
     int m_texture;
 };
 
-
-#endif // BUILDING_H
+#endif // CURVEDBUILDING_H

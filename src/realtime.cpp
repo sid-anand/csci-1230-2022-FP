@@ -28,6 +28,16 @@ Realtime::Realtime(QWidget *parent)
     m_keyMap[Qt::Key_Space]   = false;
 
     // If you must use this function, do not edit anything above this
+//    QString brick_filepath = QString(":/resources/images/building1.png");
+//    m_image = QImage(brick_filepath);
+//    m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+//    glGenTextures(1, &m_texture);
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_2D, m_texture);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image.width(), m_image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_image.bits());
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Realtime::finish() {
@@ -82,8 +92,34 @@ void Realtime::initializeGL() {
     m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
     m_skybox_shader = ShaderLoader::createShaderProgram(":/resources/shaders/skybox.vert", ":/resources/shaders/skybox.frag");
 
-    FloorPlan fp = FloorPlan(10.0f, 1);
+    std::vector<QString> filepaths;
+    filepaths.push_back(QString(":/resources/images/building1.png"));
+    filepaths.push_back(QString(":/resources/images/building2.png"));
+    filepaths.push_back(QString(":/resources/images/building3.png"));
+    filepaths.push_back(QString(":/resources/images/building4.png"));
+    filepaths.push_back(QString(":/resources/images/building5.png"));
+    filepaths.push_back(QString(":/resources/images/building6.png"));
+    filepaths.push_back(QString(":/resources/images/building7.png"));
+    filepaths.push_back(QString(":/resources/images/building8.png"));
+
+    for (int i = 0; i < filepaths.size(); i++) {
+        m_image = QImage(filepaths[i]);
+        m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+        GLuint mm_texture;
+        glGenTextures(1, &mm_texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, mm_texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image.width(), m_image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_image.bits());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        textures.push_back(mm_texture);
+    }
+
+    float gridSize = 10;
+    FloorPlan fp = FloorPlan(gridSize, filepaths.size());
     m_buildings = fp.buildings;
+
     for(int i = 0; i < m_buildings.size(); i++){
         GLuint currVBO;
         GLuint currVAO;
@@ -91,17 +127,6 @@ void Realtime::initializeGL() {
         m_vaos.push_back(currVAO);
         setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
     }
-
-    QString brick_filepath = QString(":/resources/images/building.jpg");
-    m_image = QImage(brick_filepath);
-    m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
-    glGenTextures(1, &m_brick_texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_brick_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image.width(), m_image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_image.bits());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glUseProgram(m_phong_shader);
     glUniform1i(glGetUniformLocation(m_phong_shader, "texture1"), 0);
@@ -135,7 +160,9 @@ void Realtime::paintGL() {
         GLuint buildingVAO = m_vaos[i];
         glBindVertexArray(buildingVAO);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_brick_texture);
+
+//        glBindTexture(GL_TEXTURE_2D, m_texture);
+        glBindTexture(GL_TEXTURE_2D, textures[building.getTexture()]);
         glDrawArrays(GL_TRIANGLES, 0, building.getMesh().size() / 8);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindVertexArray(0);

@@ -54,6 +54,9 @@ add_executable(${PROJECT_NAME}
     src/shapes/Building.h
     src/camera/camera.h
     src/floorplan.h
+
+    src/shapes/curvedbuilding.h
+    src/shapes/curvedbuilding.cpp
 )
 
 # GLM: this creates its library and allows you to `#include "glm/..."`
@@ -92,6 +95,15 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
         resources/images/right.png
         resources/images/bottom.png
         resources/images/top.png
+        resources/images/brick.png
+        resources/images/building1.png
+        resources/images/building2.png
+        resources/images/building3.png
+        resources/images/building4.png
+        resources/images/building5.png
+        resources/images/building6.png
+        resources/images/building7.png
+        resources/images/building8.png
 )
 
 # GLEW: this provides support for Windows (including 64-bit)

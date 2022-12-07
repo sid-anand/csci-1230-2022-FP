@@ -69,10 +69,11 @@ private:
     bool m_loadedScene = false;
 
     QImage m_image;
-    GLuint m_brick_texture;
+    GLuint m_texture;
     std::vector<Building> m_buildings;
     std::vector<GLuint> m_vbos;
     std::vector<GLuint> m_vaos;
+    std::vector<GLuint> textures;
 
     GLuint m_skybox_shader;
     GLuint m_skybox_vao, m_skybox_vbo, m_skybox_ebo;

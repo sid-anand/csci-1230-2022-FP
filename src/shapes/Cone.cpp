@@ -1,9 +1,13 @@
 #include "Cone.h"
 
-void Cone::updateParams(int param1, int param2) {
+void Cone::updateParams(int param1, int param2, float x, float y, float z, float radius) {
     m_vertexData = std::vector<float>();
     m_param1 = param1;
     m_param2 = param2;
+    m_x = x;
+    m_y = y;
+    m_z = z;
+    m_radius = radius;
     setVertexData();
 }
 
@@ -34,17 +38,23 @@ void Cone::makeTile(glm::vec3 topLeft,
 
     insertVec3(m_vertexData, topLeft);
     insertVec3(m_vertexData, topLeftNorm);
+    insertVec2(m_vertexData, glm::vec2{0.f, 1.f});
     insertVec3(m_vertexData, bottomLeft);
     insertVec3(m_vertexData, bottomLeftNorm);
+    insertVec2(m_vertexData, glm::vec2{0.f, 0.f});
     insertVec3(m_vertexData, topRight);
     insertVec3(m_vertexData, topRightNorm);
+    insertVec2(m_vertexData, glm::vec2{1.f, 1.f});
 
     insertVec3(m_vertexData, topRight);
     insertVec3(m_vertexData, topRightNorm);
+    insertVec2(m_vertexData, glm::vec2{1.f, 1.f});
     insertVec3(m_vertexData, bottomLeft);
     insertVec3(m_vertexData, bottomLeftNorm);
+    insertVec2(m_vertexData, glm::vec2{0.f, 0.f});
     insertVec3(m_vertexData, bottomRight);
     insertVec3(m_vertexData, bottomRightNorm);
+    insertVec2(m_vertexData, glm::vec2{1.f, 0.f});
 }
 
 void Cone::setVertexData() {
@@ -100,11 +110,19 @@ void Cone::setVertexData() {
         glm::vec3 bottomRightNorm = calcNormal(bottomRight);
         insertVec3(m_vertexData, tip);
         insertVec3(m_vertexData, glm::normalize(bottomLeftNorm + bottomRightNorm));
+        insertVec2(m_vertexData, glm::vec2{1.f, 1.f});
         insertVec3(m_vertexData, bottomLeft);
         insertVec3(m_vertexData, bottomLeftNorm);
+        insertVec2(m_vertexData, glm::vec2{0.f, 0.f});
         insertVec3(m_vertexData, bottomRight);
         insertVec3(m_vertexData, bottomRightNorm);
+        insertVec2(m_vertexData, glm::vec2{1.f, 0.f});
     }
+}
+
+void Cone::insertVec2(std::vector<float> &data, glm::vec2 v) {
+    data.push_back(v.x);
+    data.push_back(v.y);
 }
 
 void Cone::insertVec3(std::vector<float> &data, glm::vec3 v) {
