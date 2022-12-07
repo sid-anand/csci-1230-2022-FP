@@ -6,7 +6,7 @@
 class Cylinder
 {
 public:
-    void updateParams(int param1, int param2, float x, float y, float z);
+    void updateParams(int param1, int param2, float x, float y, float z, float radius);
     std::vector<float> getMesh() { return m_vertexData; }
 
 private:
