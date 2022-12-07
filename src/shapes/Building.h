@@ -10,6 +10,7 @@ class Building
 public:
     void updateParams(int param1, int size, int height, int depth, float x, float z, int texture);
     std::vector<float> getMesh() { return m_vertexData; }
+    int getTexture() {return m_texture;}
 
 private:
     void insertVec3(std::vector<float> &data, glm::vec3 v);
