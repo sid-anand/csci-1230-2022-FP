@@ -4,9 +4,12 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <iostream>
+#include "floorplan.h"
 #include "settings.h"
+#include "shapes/Building.h"
 #include "utils/sceneparser.h"
 #include "utils/shaderloader.h"
+#include "glm/gtx/string_cast.hpp"
 
 // ================== Project 5: Lights, Camera
 
@@ -33,37 +36,21 @@ void Realtime::finish() {
 
     // Students: anything requiring OpenGL calls when the program exits should be done here
 
-    glDeleteBuffers(1, &m_cone_vbo);
-    glDeleteBuffers(1, &m_cube_vbo);
-    glDeleteBuffers(1, &m_cylinder_vbo);
-    glDeleteBuffers(1, &m_sphere_vbo);
+    for (GLuint vbo : m_vbos) {
+        glDeleteBuffers(1, &vbo);
+    }
 
-    glDeleteVertexArrays(1, &m_cone_vao);
-    glDeleteVertexArrays(1, &m_cube_vao);
-    glDeleteVertexArrays(1, &m_cylinder_vao);
-    glDeleteVertexArrays(1, &m_sphere_vao);
+    for (GLuint vao : m_vaos) {
+        glDeleteVertexArrays(1, &vao);
+    }
 
     glDeleteProgram(m_phong_shader);
-    glDeleteProgram(m_texture_shader);
-
-    glDeleteVertexArrays(1, &m_fullscreen_vao);
-    glDeleteBuffers(1, &m_fullscreen_vbo);
-
-    glDeleteTextures(1, &m_fbo_texture);
-    glDeleteRenderbuffers(1, &m_fbo_renderbuffer);
-    glDeleteFramebuffers(1, &m_fbo);
 
     this->doneCurrent();
 }
 
 void Realtime::initializeGL() {
     m_devicePixelRatio = this->devicePixelRatio();
-
-    m_defaultFBO = 2;
-    m_screen_width = size().width() * m_devicePixelRatio;
-    m_screen_height = size().height() * m_devicePixelRatio;
-    m_fbo_width = m_screen_width;
-    m_fbo_height = m_screen_height;
 
     m_timer = startTimer(1000/60);
     m_elapsedTimer.start();
@@ -93,137 +80,69 @@ void Realtime::initializeGL() {
 
     // Load shaders
     m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
-    m_texture_shader = ShaderLoader::createShaderProgram(":/resources/shaders/texture.vert", ":/resources/shaders/texture.frag");
+    m_skybox_shader = ShaderLoader::createShaderProgram(":/resources/shaders/skybox.vert", ":/resources/shaders/skybox.frag");
 
-    // Initialize meshes and VBOs/VAOs
-    m_cone.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-    setupVBOVAO(&m_cone_vbo, &m_cone_vao, m_cone.getMesh());
+    FloorPlan fp = FloorPlan(10.0f, 1);
+    m_buildings = fp.buildings;
+    for(int i = 0; i < m_buildings.size(); i++){
+        GLuint currVBO;
+        GLuint currVAO;
+        m_vbos.push_back(currVBO);
+        m_vaos.push_back(currVAO);
+        setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
+    }
 
-    m_cube.updateParams(settings.shapeParameter1);
-    setupVBOVAO(&m_cube_vbo, &m_cube_vao, m_cube.getMesh());
+    QString brick_filepath = QString(":/resources/images/building.jpg");
+    m_image = QImage(brick_filepath);
+    m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    glGenTextures(1, &m_brick_texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_brick_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image.width(), m_image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_image.bits());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
-    m_cylinder.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-    setupVBOVAO(&m_cylinder_vbo, &m_cylinder_vao, m_cylinder.getMesh());
+    glUseProgram(m_phong_shader);
+    glUniform1i(glGetUniformLocation(m_phong_shader, "texture1"), 0);
+    glUseProgram(0);
 
-    m_sphere.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-    setupVBOVAO(&m_sphere_vbo, &m_sphere_vao, m_sphere.getMesh());
+    setupSkybox();
 
-    // Generate mesh for fullscreen quad
-    std::vector<GLfloat> fullscreen_quad_data =
-    {
-      -1.0f,  1.0f, 0.0f, // top left
-      0.0f, 1.0f,
-      -1.0f, -1.0f, 0.0f, // bottom left
-      0.0f, 0.0f,
-      1.0f, -1.0f, 0.0f, // bottom right
-      1.0f, 0.0f,
-      1.0f,  1.0f, 0.0f, // top right
-      1.0f, 1.0f,
-      -1.0f,  1.0f, 0.0f, // top left
-      0.0f, 1.0f,
-      1.0f, -1.0f, 0.0f, // bottom right
-      1.0f, 0.0f
+    m_renderData.cameraData = SceneCameraData{
+            glm::vec4(0, 0, 0, 1),
+            glm::vec4(0, 0, -1, 0),
+            glm::vec4(0, 1, 0, 0),
+            30
     };
 
-    // Generate and bind a VBO and a VAO for a fullscreen quad
-    glGenBuffers(1, &m_fullscreen_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, m_fullscreen_vbo);
-    glBufferData(GL_ARRAY_BUFFER, fullscreen_quad_data.size() * sizeof(GLfloat), fullscreen_quad_data.data(), GL_STATIC_DRAW);
-    glGenVertexArrays(1, &m_fullscreen_vao);
-    glBindVertexArray(m_fullscreen_vao);
-
-    // Set VAO attributes for fullscreen quad
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), reinterpret_cast<void*>(sizeof(GLfloat) * 3));
-
-    // Unbind the fullscreen quad's VBO and VAO
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    makeFBO();
+    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, 100.f);
 }
 
 void Realtime::paintGL() {
     // Students: anything requiring OpenGL calls every frame should be done here
 
-    // Bind and clear the FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-    glViewport(0, 0, m_fbo_width, m_fbo_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Bind the shader
     glUseProgram(m_phong_shader);
 
-    // Declare global uniforms
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "proj"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
-    glUniform4fv(glGetUniformLocation(m_phong_shader, "cameraPos"), 1, &m_camera.getPos()[0]);
-    glUniform1f(glGetUniformLocation(m_phong_shader, "ka"), m_renderData.globalData.ka);
-    glUniform1f(glGetUniformLocation(m_phong_shader, "kd"), m_renderData.globalData.kd);
-    glUniform1f(glGetUniformLocation(m_phong_shader, "ks"), m_renderData.globalData.ks);
-
-    for (int i = 0; i < m_renderData.lights.size(); i++) {
-        SceneLightData &light = m_renderData.lights[i];
-            std::string iStr = std::to_string(i);
-            GLuint lightTypeID = glGetUniformLocation(m_phong_shader, ("lights[" + iStr + "].type").c_str());
-            glUniform1i(lightTypeID, int(light.type));
-            GLuint lightColorID = glGetUniformLocation(m_phong_shader, ("lights[" + iStr + "].color").c_str());
-            glUniform4fv(lightColorID, 1, &light.color[0]);
-            GLuint lightFunctionID = glGetUniformLocation(m_phong_shader, ("lights[" + iStr + "].function").c_str());
-            glUniform3fv(lightFunctionID, 1, &light.function[0]);
-            GLuint lightPosID = glGetUniformLocation(m_phong_shader, ("lights[" + iStr + "].pos").c_str());
-            glUniform4fv(lightPosID, 1, &light.pos[0]);
-            GLuint lightDirID = glGetUniformLocation(m_phong_shader, ("lights[" + iStr + "].dir").c_str());
-            glUniform4fv(lightDirID, 1, &light.dir[0]);
-            GLuint lightPenumbraID = glGetUniformLocation(m_phong_shader, ("lights[" + iStr + "].penumbra").c_str());
-            glUniform1f(lightPenumbraID, light.penumbra);
-            GLuint lightAngleID = glGetUniformLocation(m_phong_shader, ("lights[" + iStr + "].angle").c_str());
-            glUniform1f(lightAngleID, light.angle);
+    for (int i = 0; i < m_buildings.size(); i++) {
+        Building building = m_buildings[i];
+        GLuint buildingVAO = m_vaos[i];
+        glBindVertexArray(buildingVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_brick_texture);
+        glDrawArrays(GL_TRIANGLES, 0, building.getMesh().size() / 8);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindVertexArray(0);
     }
 
-    // Only want to include the lights we're handling
-    glUniform1i(glGetUniformLocation(m_phong_shader, "numLights"), m_renderData.lights.size());
-
-    // Declare primitive-specific uniforms, and bind and draw the VAOs
-    for (RenderShapeData &shape : m_renderData.shapes) {
-        SceneMaterial mat = shape.primitive.material;
-
-        glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "model"), 1, GL_FALSE, &shape.ctm[0][0]);
-        glUniform4fv(glGetUniformLocation(m_phong_shader, "ambientColor"), 1, &mat.cAmbient[0]);
-        glUniform4fv(glGetUniformLocation(m_phong_shader, "diffuseColor"), 1, &mat.cDiffuse[0]);
-        glUniform4fv(glGetUniformLocation(m_phong_shader, "specularColor"), 1, &mat.cSpecular[0]);
-        glUniform1f(glGetUniformLocation(m_phong_shader, "shininess"), mat.shininess);
-
-        if (shape.primitive.type == PrimitiveType::PRIMITIVE_CONE) {
-            glBindVertexArray(m_cone_vao);
-            glDrawArrays(GL_TRIANGLES, 0, m_cone.getMesh().size() / 6);
-        } else if (shape.primitive.type == PrimitiveType::PRIMITIVE_CUBE) {
-            glBindVertexArray(m_cube_vao);
-            glDrawArrays(GL_TRIANGLES, 0, m_cube.getMesh().size() / 6);
-        } else if (shape.primitive.type == PrimitiveType::PRIMITIVE_CYLINDER) {
-            glBindVertexArray(m_cylinder_vao);
-            glDrawArrays(GL_TRIANGLES, 0, m_cylinder.getMesh().size() / 6);
-        } else if (shape.primitive.type == PrimitiveType::PRIMITIVE_SPHERE) {
-            glBindVertexArray(m_sphere_vao);
-            glDrawArrays(GL_TRIANGLES, 0, m_sphere.getMesh().size() / 6);
-        }
-    }
-
-    // Unbind the VAO
-    glBindVertexArray(0);
-
-    // Unbind the shader
     glUseProgram(0);
 
-    // Bind and clear the default FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-    glViewport(0, 0, m_screen_width, m_screen_height);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Call paintTexture to draw our FBO color attachment texture
-    paintTexture(m_fbo_texture);
+    // Draw skybox last for performance reasons
+    drawSkybox();
 }
 
 void Realtime::resizeGL(int w, int h) {
@@ -231,17 +150,6 @@ void Realtime::resizeGL(int w, int h) {
     glViewport(0, 0, size().width() * m_devicePixelRatio, size().height() * m_devicePixelRatio);
 
     // Students: anything requiring OpenGL calls when the program starts should be done here
-
-    glDeleteTextures(1, &m_fbo_texture);
-    glDeleteRenderbuffers(1, &m_fbo_renderbuffer);
-    glDeleteFramebuffers(1, &m_fbo);
-
-    m_screen_width = size().width() * m_devicePixelRatio;
-    m_screen_height = size().height() * m_devicePixelRatio;
-    m_fbo_width = m_screen_width;
-    m_fbo_height = m_screen_height;
-
-    makeFBO();
 
     if (m_loadedScene) {
         m_camera.setDimensions(size().width(), size().height());
@@ -267,19 +175,121 @@ void Realtime::settingsChanged() {
         m_camera.setPlanes(settings.nearPlane, settings.farPlane);
     }
 
-    m_cone.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-    m_cube.updateParams(settings.shapeParameter1);
-    m_cylinder.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-    m_sphere.updateParams(settings.shapeParameter1, settings.shapeParameter2);
-
-    makeCurrent();
-    updateVBO(m_cone_vbo, m_cone.getMesh());
-    updateVBO(m_cube_vbo, m_cube.getMesh());
-    updateVBO(m_cylinder_vbo, m_cylinder.getMesh());
-    updateVBO(m_sphere_vbo, m_sphere.getMesh());
-    doneCurrent();
-
     update(); // asks for a PaintGL() call to occur
+}
+
+void Realtime::setupSkybox() {
+    std::vector<GLfloat> skyboxVertices =
+    {
+        //   Coordinates
+        -1.0f, -1.0f,  1.0f,//        7--------6
+         1.0f, -1.0f,  1.0f,//       /|       /|
+         1.0f, -1.0f, -1.0f,//      4--------5 |
+        -1.0f, -1.0f, -1.0f,//      | |      | |
+        -1.0f,  1.0f,  1.0f,//      | 3------|-2
+         1.0f,  1.0f,  1.0f,//      |/       |/
+         1.0f,  1.0f, -1.0f,//      0--------1
+        -1.0f,  1.0f, -1.0f
+    };
+
+    std::vector<GLuint> skyboxIndices =
+    {
+        // Right
+        1, 2, 6,
+        6, 5, 1,
+        // Left
+        0, 4, 7,
+        7, 3, 0,
+        // Top
+        4, 5, 6,
+        6, 7, 4,
+        // Bottom
+        0, 3, 2,
+        2, 1, 0,
+        // Back
+        0, 1, 5,
+        5, 4, 0,
+        // Front
+        3, 7, 6,
+        6, 2, 3
+    };
+
+    glGenVertexArrays(1, &m_skybox_vao);
+    glGenBuffers(1, &m_skybox_vbo);
+    glGenBuffers(1, &m_skybox_ebo);
+    glBindVertexArray(m_skybox_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_skybox_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * skyboxVertices.size(), skyboxVertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_skybox_ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * skyboxIndices.size(), skyboxIndices.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    std::string facesCubemap[6] =
+    {
+        ":/resources/images/right.png",
+        ":/resources/images/left.png",
+        ":/resources/images/top.png",
+        ":/resources/images/bottom.png",
+        ":/resources/images/front.png",
+        ":/resources/images/back.png"
+    };
+
+    glGenTextures(1, &m_cubemap_texture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap_texture);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    for (int i = 0; i < 6; i++) {
+        QImage image = QImage(QString(facesCubemap[i].c_str()));
+        image = image.convertToFormat(QImage::Format_RGBA8888); // not mirrored
+        glTexImage2D
+        (
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+            0,
+            GL_RGBA,
+            image.width(),
+            image.height(),
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            image.bits()
+        );
+    }
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+    glUseProgram(m_skybox_shader);
+    glUniform1i(glGetUniformLocation(m_skybox_shader, "skybox"), 0);
+    glUseProgram(0);
+}
+
+void Realtime::drawSkybox() {
+    // Cubemap always has depth of 1.0, so we need GL_LEQUAL, not GL_LESS
+    glDepthFunc(GL_LEQUAL);
+
+    glUseProgram(m_skybox_shader);
+    // Get rid of last row/col to remove translation of skybox
+    glm::mat4 view = glm::mat4(glm::mat3(m_camera.getViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader, "view"), 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader, "projection"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
+
+    glDisable(GL_CULL_FACE);
+    glBindVertexArray(m_skybox_vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap_texture);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    glEnable(GL_CULL_FACE);
+
+    // Switch back to the normal depth function
+    glDepthFunc(GL_LESS);
 }
 
 void Realtime::setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh) {
@@ -297,58 +307,14 @@ void Realtime::setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh) 
     // Add attributes to VAO
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, 0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 3));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 8, 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 8, reinterpret_cast<void*>(sizeof(GLfloat) * 3));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 8, reinterpret_cast<void*>(sizeof(GLfloat) * 6));
 
     // Unbind VBO and VAO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-}
-
-void Realtime::updateVBO(GLuint vbo, std::vector<GLfloat> mesh) {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * mesh.size(), mesh.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void Realtime::makeFBO() {
-    glGenTextures(1, &m_fbo_texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_fbo_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fbo_width, m_fbo_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glGenRenderbuffers(1, &m_fbo_renderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_fbo_renderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_fbo_width, m_fbo_height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    glGenFramebuffers(1, &m_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fbo_texture, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_fbo_renderbuffer);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-}
-
-void Realtime::paintTexture(GLuint texture) {
-    glUseProgram(m_texture_shader);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "tex"), 0);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "width"), m_fbo_width);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "height"), m_fbo_height);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "perPixelFilter"), settings.perPixelFilter);
-    glUniform1i(glGetUniformLocation(m_texture_shader, "kernelBasedFilter"), settings.kernelBasedFilter);
-
-    glBindVertexArray(m_fullscreen_vao);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindVertexArray(0);
-    glUseProgram(0);
 }
 
 // ================== Project 6: Action!

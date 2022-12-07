@@ -2,6 +2,7 @@
 
 // Defined before including GLEW to suppress deprecation messages on macOS
 #include "camera/camera.h"
+#include "shapes/Building.h"
 #include "shapes/Cone.h"
 #include "shapes/Cube.h"
 #include "shapes/Cylinder.h"
@@ -57,9 +58,8 @@ private:
 
     // Additional methods / fields
     void setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh);
-    void updateVBO(GLuint vbo, std::vector<GLfloat> mesh);
-    void makeFBO();
-    void paintTexture(GLuint texture);
+    void setupSkybox();
+    void drawSkybox();
 
     RenderData m_renderData;
     Camera m_camera;
@@ -68,33 +68,15 @@ private:
     bool m_initializedGL = false;
     bool m_loadedScene = false;
 
-    Cone m_cone;
-    GLuint m_cone_vbo;
-    GLuint m_cone_vao;
+    QImage m_image;
+    GLuint m_brick_texture;
+    std::vector<Building> m_buildings;
+    std::vector<GLuint> m_vbos;
+    std::vector<GLuint> m_vaos;
 
-    Cube m_cube;
-    GLuint m_cube_vbo;
-    GLuint m_cube_vao;
-
-    Cylinder m_cylinder;
-    GLuint m_cylinder_vbo;
-    GLuint m_cylinder_vao;
-
-    Sphere m_sphere;
-    GLuint m_sphere_vbo;
-    GLuint m_sphere_vao;
-
-    GLuint m_defaultFBO;
-    int m_fbo_width;
-    int m_fbo_height;
-    int m_screen_width;
-    int m_screen_height;
-    GLuint m_texture_shader;
-    GLuint m_fullscreen_vbo;
-    GLuint m_fullscreen_vao;
-    GLuint m_fbo;
-    GLuint m_fbo_texture;
-    GLuint m_fbo_renderbuffer;
+    GLuint m_skybox_shader;
+    GLuint m_skybox_vao, m_skybox_vbo, m_skybox_ebo;
+    GLuint m_cubemap_texture;
 
     float m_distanceBezier;
 };
