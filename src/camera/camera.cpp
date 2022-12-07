@@ -126,9 +126,43 @@ glm::vec3 Camera::calcBezierSegmentDirection(float t) {
     return direction;
 }
 
-void Camera::moveAlongBezierCurve(float t) {
+void Camera::moveAlongBezierCurve(float distance) {
+    float t = calcTFromDistance(distance);
     m_pos = glm::vec4(calcBezierSegmentPoint(t), 1);
     m_look = glm::vec4(calcBezierSegmentDirection(t), 1);
+}
+
+float Camera::calcTFromDistance(float distance) {
+    float t1 = std::floor(distance * m_distanceLUTSize) / float(m_distanceLUTSize);
+    float t2 = std::ceil(distance * m_distanceLUTSize) / float(m_distanceLUTSize);
+    if (t2 == 0) {
+        return 0;
+    } else if (t1 == 1) {
+        return 1;
+    } else {
+        float difference = (distance - t1) * m_distanceLUTSize;
+        int index = t1 * m_distanceLUTSize;
+        float priorDistance = distanceLUT[index];
+        float nextDistance = distanceLUT[index + 1];
+        float added = (nextDistance - priorDistance) * difference;
+        return (priorDistance + added) / m_bezierCurveLength;
+    }
+}
+
+void Camera::generateDistanceLUT() {
+    distanceLUT.clear();
+    distanceLUT.push_back(0);
+    glm::vec3 oldPoint = m_bezierPoint1;
+    glm::vec3 newPoint;
+    float curDistance = 0;
+    for (int i = 1; i <= m_distanceLUTSize; i++) {
+        float t = float(i) / float(m_distanceLUTSize);
+        newPoint = calcBezierSegmentPoint(t);
+        curDistance += glm::distance(newPoint, oldPoint);
+        distanceLUT.push_back(curDistance);
+        oldPoint = newPoint;
+    }
+    m_bezierCurveLength = curDistance;
 }
 
 void Camera::setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4) {
@@ -136,4 +170,5 @@ void Camera::setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point
     m_bezierPoint2 = point2;
     m_bezierPoint3 = point3;
     m_bezierPoint4 = point4;
+    generateDistanceLUT();
 }

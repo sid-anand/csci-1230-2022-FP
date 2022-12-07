@@ -32,8 +32,9 @@ public:
 
     void rotate(float deltaX, float deltaY);
 
+    void moveAlongBezierCurve(float distance);
 
-    void moveAlongBezierCurve(float t);
+    float calcTFromDistance(float distance);
 
     void setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4);
 
@@ -47,10 +48,17 @@ private:
     glm::vec3 m_bezierPoint2;
     glm::vec3 m_bezierPoint3;
     glm::vec3 m_bezierPoint4;
+    float m_bezierCurveLength;
 
     glm::vec3 linearInterpolate(float t, glm::vec3 point1, glm::vec3 point2);
 
     glm::vec3 calcBezierSegmentPoint(float t);
 
     glm::vec3 calcBezierSegmentDirection(float t);
+
+    void generateDistanceLUT();
+
+    int m_distanceLUTSize = 20;
+
+    std::vector<float> distanceLUT;
 };
