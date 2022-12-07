@@ -141,6 +141,13 @@ void Realtime::paintGL() {
         glBindVertexArray(0);
     }
 
+    // simulating the moonlight
+    glm::vec4 lightDirection = glm::vec4(1, -3, -2, 0);
+    glm::vec4 lightColor = glm::vec4(1, 1, 1, 1);
+    glUniform4fv(glGetUniformLocation(m_phong_shader, "cameraPos"), 1, &m_camera.getPos()[0]);
+    glUniform4fv(glGetUniformLocation(m_phong_shader, "lightDirection"), 1, &lightDirection[0]);
+    glUniform4fv(glGetUniformLocation(m_phong_shader, "lightColor"), 1, &lightColor[0]);
+
     glUseProgram(0);
 
     // Draw skybox last for performance reasons
