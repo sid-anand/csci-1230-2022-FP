@@ -77,4 +77,6 @@ private:
     GLuint m_skybox_shader;
     GLuint m_skybox_vao, m_skybox_vbo, m_skybox_ebo;
     GLuint m_cubemap_texture;
+
+    float m_distanceBezier;
 };

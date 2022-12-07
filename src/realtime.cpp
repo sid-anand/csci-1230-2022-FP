@@ -117,6 +117,8 @@ void Realtime::initializeGL() {
     };
 
     m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, 100.f);
+    m_camera.setBezierPoints(glm::vec3(5, 5, 5), glm::vec3(9, 2, 9), glm::vec3(9, 2, 2), glm::vec3(5, 9, 2));
+    m_distanceBezier = 0;
 }
 
 void Realtime::paintGL() {
@@ -371,6 +373,12 @@ void Realtime::timerEvent(QTimerEvent *event) {
         m_camera.translate(CameraDirection::UP, deltaTime);
     } else if (m_keyMap[Qt::Key_Control] || m_keyMap[Qt::Key_Meta]) {
         m_camera.translate(CameraDirection::DOWN, deltaTime);
+    } else if (m_keyMap[Qt::Key_G]) {
+        m_distanceBezier += deltaTime / 5.f;
+        if (m_distanceBezier > 1) {
+            m_distanceBezier = 0;
+        }
+        m_camera.moveAlongBezierCurve(m_distanceBezier);
     }
 
     update(); // asks for a PaintGL() call to occur
