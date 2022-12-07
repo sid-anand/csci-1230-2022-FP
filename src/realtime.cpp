@@ -117,6 +117,8 @@ void Realtime::initializeGL() {
     };
 
     m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, 100.f);
+    m_camera.setBezierPoints(glm::vec3(5, 5, 5), glm::vec3(9, 2, 9), glm::vec3(9, 2, 2), glm::vec3(5, 9, 2));
+    m_distanceBezier = 0;
 }
 
 void Realtime::paintGL() {
@@ -160,8 +162,6 @@ void Realtime::sceneChanged() {
     SceneParser::parse(settings.sceneFilePath, m_renderData);
     m_loadedScene = true;
     m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, settings.farPlane);
-    m_camera.setBezierPoints(glm::vec3(3, 3, 3), glm::vec3(-3, 3, 3), glm::vec3(3, -3, 0), glm::vec3(-3, -3, 3));
-    m_distanceBezier = 0;
 
     update(); // asks for a PaintGL() call to occur
 }
