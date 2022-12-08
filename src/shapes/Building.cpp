@@ -1,12 +1,19 @@
 #include "Building.h"
 #include "Cube.h"
+#include "shapes/Cylinder.h"
 #include <iostream>
 
 void Building::updateParams(int param1, int size, int height, int depth, float x, float z, int texture) {
     m_vertexData = std::vector<float>();
     m_param1 = param1;
     m_size = size - 1;
+    if (m_size == 0) {
+        m_size = 2;
+    }
     m_depth = depth - 1;
+    if (m_depth == 0) {
+        m_depth = 2;
+    }
     m_height = 10;
     m_x = x + 0.25f;
     m_z = z + 0.25f;
@@ -16,6 +23,8 @@ void Building::updateParams(int param1, int size, int height, int depth, float x
 
 void Building::makeBuilding() {
     Cube cube = Cube();
+    Cylinder cylinder = Cylinder();
+
     m_vertexData.clear();
     bool cluster = arc4random() % 2;
     if (cluster) {
@@ -26,10 +35,22 @@ void Building::makeBuilding() {
                 float zjitter = float(arc4random() % 50)/100.f;
                 i += xjitter;
                 k += zjitter;
-                for (float j = 0.f; j < float(towerHeight); j++) {
-                    cube.updateParams(m_param1, i + m_x, j, k + m_z);
-                    std::vector<float> cube_data = cube.getMesh();
-                    m_vertexData.insert(m_vertexData.end(), cube_data.begin(), cube_data.end());
+
+                bool cylindrical = arc4random() % 2;
+
+                if (cylindrical) {
+                    for (float j = 0.f; j < float(towerHeight); j++) {
+                        int param2 = arc4random() % 3 + 3;
+                        cylinder.updateParams(1, param2, i + m_x, j, k + m_z, 0.5f);
+                        std::vector<float> cylinder_data = cylinder.getMesh();
+                        m_vertexData.insert(m_vertexData.end(), cylinder_data.begin(), cylinder_data.end());
+                    }
+                } else {
+                    for (float j = 0.f; j < float(towerHeight); j++) {
+                        cube.updateParams(m_param1, i + m_x, j, k + m_z);
+                        std::vector<float> cube_data = cube.getMesh();
+                        m_vertexData.insert(m_vertexData.end(), cube_data.begin(), cube_data.end());
+                    }
                 }
             }
         }
