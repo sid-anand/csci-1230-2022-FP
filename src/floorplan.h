@@ -1,4 +1,6 @@
 #include "shapes/Building.h"
+#include <iostream>
+#include <ostream>
 #include <vector>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -58,7 +60,12 @@ class FloorPlan {
                     float buildingHeight = arc4random() % maxHeight + 1;
                     Building building = Building();
                     float buildingDimensionX = blockSizesX[i];
-                    float buildingDimensionZ = blockSizesZ[i];
+                    float buildingDimensionZ = blockSizesZ[j];
+//                    std::cout<< "blah" <<std::endl;
+//                    std::cout<< i <<std::endl;
+//                    std::cout<< j <<std::endl;
+//                    std::cout<< buildingDimensionX <<std::endl;
+//                    std::cout<< buildingDimensionZ <<std::endl;
                     xAccumulator += buildingDimensionX + streetSize;
                     zAccumulator += buildingDimensionZ + streetSize;
                     building.updateParams(1, buildingDimensionX, buildingHeight, buildingDimensionZ, xAccumulator, zAccumulator, arc4random() % numTextures);
