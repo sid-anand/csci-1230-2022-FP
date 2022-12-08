@@ -61,7 +61,7 @@ class FloorPlan {
                     float buildingDimensionZ = blockSizesZ[i];
                     xAccumulator += buildingDimensionX + streetSize;
                     zAccumulator += buildingDimensionZ + streetSize;
-//                    building.updateParams(1, blockSize, buildingHeight, blockSize, xAccumulator, zAccumulator, arc4random() % numTextures);
+                    building.updateParams(1, buildingDimensionX, buildingHeight, buildingDimensionZ, xAccumulator, zAccumulator, arc4random() % numTextures);
                     buildings.push_back(building);
                 }
             }
