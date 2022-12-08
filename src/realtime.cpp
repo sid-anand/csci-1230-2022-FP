@@ -411,6 +411,7 @@ void Realtime::timerEvent(QTimerEvent *event) {
         m_distanceBezier += deltaTime / 5.f;
         if (m_distanceBezier > 1) {
             m_distanceBezier = 0;
+            m_camera.updateBezierPoints(2.5);
         }
         m_camera.moveAlongBezierCurve(m_distanceBezier);
     }

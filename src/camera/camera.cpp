@@ -173,8 +173,46 @@ void Camera::setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point
     generateDistanceLUT();
 }
 
-std::vector<glm::vec3> Camera::getNewBezierPoints12() {
-    glm::vec3 newp1 = m_bezierPoint4;
-    glm::vec3 newp2 = (2.f * m_bezierPoint4 - m_bezierPoint3);
-    return std::vector<glm::vec3> {newp1, newp2};
+void Camera::updateBezierPoints(float nextBlock) {
+    // for now, keep Z constant
+    float z = m_bezierPoint4[2];
+    glm::vec3 newBezier1 = m_bezierPoint4;
+    glm::vec3 newBezier2 = 2.f * m_bezierPoint4 - m_bezierPoint3;
+
+    // Say there's 4.5 btw blocks
+    // int() rounds down
+    // then 0.5, 1.5, 2.5, 3.5
+    float xDifference1 = (arc4random() % int(nextBlock)) + 0.5f;
+
+    // say it's 6, then we want 6/10 to go down and 4/10 to go up
+    float originalY = newBezier1[1];
+    // 1 to 10
+    int randomVal = (arc4random() % int(maxHeight)) + 1;
+    bool goUp = (randomVal > originalY);
+    float newBezier4Y = originalY;
+    float yDifference;
+    if (goUp) {
+        float maxDifference = maxHeight - originalY;
+        yDifference = (arc4random() % int(maxDifference)) + 1;
+    } else {
+        float maxDifference = originalY;
+        yDifference = -((arc4random() % int(maxDifference)) + 1);
+    }
+    newBezier4Y += yDifference;
+
+    float newBezier4X = newBezier1[0] + nextBlock;
+
+    float newBezier4Z = z;
+
+    float newBezier3X = newBezier4X - xDifference1;
+    float newBezier3Y = newBezier2[1];
+    float newBezier3Z = z;
+
+    glm::vec3 newBezier3 = glm::vec3(newBezier3X, newBezier3Y, newBezier3Z);
+    glm::vec3 newBezier4 = glm::vec3(newBezier4X, newBezier4Y, newBezier4Z);
+    m_bezierPoint1 = newBezier1;
+    m_bezierPoint2 = newBezier2;
+    m_bezierPoint3 = newBezier3;
+    m_bezierPoint4 = newBezier4;
+
 }
