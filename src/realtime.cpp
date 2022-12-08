@@ -142,7 +142,7 @@ void Realtime::initializeGL() {
     };
 
     m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, 100.f);
-    m_camera.setBezierPoints(glm::vec3(5, 5, 5), glm::vec3(9, 2, 9), glm::vec3(9, 2, 2), glm::vec3(5, 9, 2));
+    m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(1, 2, 0), glm::vec3(1.5, 2, 0), glm::vec3(2.5, 4, 0));
     m_distanceBezier = 0;
 }
 
