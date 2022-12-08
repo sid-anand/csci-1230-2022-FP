@@ -6,7 +6,13 @@ void Building::updateParams(int param1, int size, int height, int depth, float x
     m_vertexData = std::vector<float>();
     m_param1 = param1;
     m_size = size - 1;
+    if (m_size == 0) {
+        m_size = 2;
+    }
     m_depth = depth - 1;
+    if (m_depth == 0) {
+        m_depth = 2;
+    }
     m_height = 10;
     m_x = x + 0.25f;
     m_z = z + 0.25f;

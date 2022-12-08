@@ -53,21 +53,21 @@ class FloorPlan {
             // xAccumulator and zAccumulator are basically the coordinates of where the block is
             // note it starts at -streetSize rather than 0 because we add streetSize + the buildingSize in the for loop,
             // and we don't have a street for the first block in either dimension
-            float xAccumulator = -streetSize;
             for (int i = 0; i < blockSizesX.size(); i++) {
-                float zAccumulator = -streetSize;
+                float xAccumulator = -streetSize;
+                float buildingDimensionX = blockSizesX[i];
+                xAccumulator += buildingDimensionX + streetSize;
                 for (int j = 0; j < blockSizesZ.size(); j++) {
+                    float zAccumulator = streetSize;
                     float buildingHeight = arc4random() % maxHeight + 1;
                     Building building = Building();
-                    float buildingDimensionX = blockSizesX[i];
                     float buildingDimensionZ = blockSizesZ[j];
+                    zAccumulator -= buildingDimensionZ + streetSize;
 //                    std::cout<< "blah" <<std::endl;
 //                    std::cout<< i <<std::endl;
 //                    std::cout<< j <<std::endl;
-//                    std::cout<< buildingDimensionX <<std::endl;
-//                    std::cout<< buildingDimensionZ <<std::endl;
-                    xAccumulator += buildingDimensionX + streetSize;
-                    zAccumulator += buildingDimensionZ + streetSize;
+//                    std::cout<< xAccumulator <<std::endl;
+//                    std::cout<< zAccumulator <<std::endl;
                     building.updateParams(1, buildingDimensionX, buildingHeight, buildingDimensionZ, xAccumulator, zAccumulator, arc4random() % numTextures);
                     buildings.push_back(building);
                 }
