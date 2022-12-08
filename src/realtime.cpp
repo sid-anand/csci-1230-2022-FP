@@ -116,7 +116,7 @@ void Realtime::initializeGL() {
         textures.push_back(mm_texture);
     }
 
-    float gridSize = 10;
+    float gridSize = 50;
     FloorPlan fp = FloorPlan(gridSize, filepaths.size());
     m_buildings = fp.buildings;
 
