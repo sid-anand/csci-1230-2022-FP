@@ -7,6 +7,7 @@
 #include "floorplan.h"
 #include "settings.h"
 #include "shapes/Building.h"
+#include "shapes/Ground.h"
 #include "utils/sceneparser.h"
 #include "utils/shaderloader.h"
 #include "glm/gtx/string_cast.hpp"
@@ -28,16 +29,6 @@ Realtime::Realtime(QWidget *parent)
     m_keyMap[Qt::Key_Space]   = false;
 
     // If you must use this function, do not edit anything above this
-//    QString brick_filepath = QString(":/resources/images/building1.png");
-//    m_image = QImage(brick_filepath);
-//    m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
-//    glGenTextures(1, &m_texture);
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_2D, m_texture);
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image.width(), m_image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_image.bits());
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Realtime::finish() {
@@ -92,34 +83,28 @@ void Realtime::initializeGL() {
     m_phong_shader = ShaderLoader::createShaderProgram(":/resources/shaders/phong.vert", ":/resources/shaders/phong.frag");
     m_skybox_shader = ShaderLoader::createShaderProgram(":/resources/shaders/skybox.vert", ":/resources/shaders/skybox.frag");
 
-    std::vector<QString> filepaths;
-    filepaths.push_back(QString(":/resources/images/building1.png"));
-    filepaths.push_back(QString(":/resources/images/building2.png"));
-    filepaths.push_back(QString(":/resources/images/building3.png"));
-    filepaths.push_back(QString(":/resources/images/building4.png"));
-    filepaths.push_back(QString(":/resources/images/building5.png"));
-    filepaths.push_back(QString(":/resources/images/building6.png"));
-    filepaths.push_back(QString(":/resources/images/building7.png"));
-    filepaths.push_back(QString(":/resources/images/building8.png"));
+    m_ground = Ground();
+    m_ground.updateParams(1, m_grid_size, m_grid_size);
+    setupVBOVAO(&m_ground_vbo, &m_ground_vao, m_ground.getMesh());
+    m_ground_texture = createTexture(":/resources/images/ground.jpg");
+
+    std::vector<std::string> filepaths;
+    filepaths.push_back(":/resources/images/building1.png");
+    filepaths.push_back(":/resources/images/building2.png");
+    filepaths.push_back(":/resources/images/building3.png");
+    filepaths.push_back(":/resources/images/building4.png");
+    filepaths.push_back(":/resources/images/building5.png");
+    filepaths.push_back(":/resources/images/building6.png");
+    filepaths.push_back(":/resources/images/building7.png");
+    filepaths.push_back(":/resources/images/building8.png");
 
     for (int i = 0; i < filepaths.size(); i++) {
-        m_image = QImage(filepaths[i]);
-        m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
-        GLuint mm_texture;
-        glGenTextures(1, &mm_texture);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mm_texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image.width(), m_image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_image.bits());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        textures.push_back(mm_texture);
+        GLuint texture = createTexture(filepaths[i]);
+        textures.push_back(texture);
     }
 
-    float gridSize = 50;
-    FloorPlan fp = FloorPlan(gridSize, filepaths.size());
+    FloorPlan fp = FloorPlan(m_grid_size, filepaths.size());
     m_buildings = fp.buildings;
-
     for(int i = 0; i < m_buildings.size(); i++){
         GLuint currVBO;
         GLuint currVAO;
@@ -155,18 +140,6 @@ void Realtime::paintGL() {
 
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "proj"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
-    for (int i = 0; i < m_buildings.size(); i++) {
-        Building building = m_buildings[i];
-        GLuint buildingVAO = m_vaos[i];
-        glBindVertexArray(buildingVAO);
-        glActiveTexture(GL_TEXTURE0);
-
-//        glBindTexture(GL_TEXTURE_2D, m_texture);
-        glBindTexture(GL_TEXTURE_2D, textures[building.getTexture()]);
-        glDrawArrays(GL_TRIANGLES, 0, building.getMesh().size() / 8);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glBindVertexArray(0);
-    }
 
     // simulating the moonlight
     glm::vec4 lightDirection = glm::vec4(1, -3, -2, 0);
@@ -174,6 +147,24 @@ void Realtime::paintGL() {
     glUniform4fv(glGetUniformLocation(m_phong_shader, "cameraPos"), 1, &m_camera.getPos()[0]);
     glUniform4fv(glGetUniformLocation(m_phong_shader, "lightDirection"), 1, &lightDirection[0]);
     glUniform4fv(glGetUniformLocation(m_phong_shader, "lightColor"), 1, &lightColor[0]);
+
+    glBindVertexArray(m_ground_vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_ground_texture);
+    glDrawArrays(GL_TRIANGLES, 0, m_ground.getMesh().size() / 8);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(0);
+
+    for (int i = 0; i < m_buildings.size(); i++) {
+        Building building = m_buildings[i];
+        GLuint buildingVAO = m_vaos[i];
+        glBindVertexArray(buildingVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textures[building.getTexture()]);
+        glDrawArrays(GL_TRIANGLES, 0, building.getMesh().size() / 8);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindVertexArray(0);
+    }
 
     glUseProgram(0);
 
@@ -319,6 +310,7 @@ void Realtime::drawSkybox() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap_texture);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindVertexArray(0);
     glEnable(GL_CULL_FACE);
 
@@ -349,6 +341,20 @@ void Realtime::setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh) 
     // Unbind VBO and VAO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+GLuint Realtime::createTexture(std::string filepath) {
+    m_image = QImage(QString(filepath.c_str()));
+    m_image = m_image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    GLuint mm_texture;
+    glGenTextures(1, &mm_texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mm_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_image.width(), m_image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, m_image.bits());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return mm_texture;
 }
 
 // ================== Project 6: Action!
