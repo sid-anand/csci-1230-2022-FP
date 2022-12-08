@@ -20,11 +20,20 @@ void Cylinder::makeTile(glm::vec3 topLeft,
     glm::vec3 bottomLeftNorm;
     glm::vec3 bottomRightNorm;
     glm::vec3 topRightNorm;
+    glm::vec2 topLeftTexture = glm::vec2{topLeft[0] + 0.5f, topLeft[2] + 0.5f};
+    glm::vec2 bottomLeftTexture = glm::vec2{bottomLeft[0] + 0.5f, bottomLeft[2] + 0.5f};
+    glm::vec2 bottomRightTexture = glm::vec2{bottomRight[0] + 0.5f, bottomRight[2] + 0.5f};
+    glm::vec2 topRightTexture = glm::vec2{topRight[0] + 0.5f, topRight[2] + 0.5f};
+
     if (cap == 0) {
         topLeftNorm = glm::normalize(glm::vec3(topLeft.x, 0, topLeft.z));
         bottomLeftNorm = glm::normalize(glm::vec3(bottomLeft.x, 0, bottomLeft.z));
         bottomRightNorm = glm::normalize(glm::vec3(bottomRight.x, 0, bottomRight.z));
         topRightNorm = glm::normalize(glm::vec3(topRight.x, 0, topRight.z));
+        topLeftTexture = glm::vec2{0.f, 1.f};
+        bottomLeftTexture = glm::vec2{0.f, 0.f};
+        bottomRightTexture = glm::vec2{1.f, 0.f};
+        topRightTexture = glm::vec2{1.f, 1.f};
     } else if (cap == -1) {
         topLeftNorm = glm::vec3(0, -1, 0);
         bottomLeftNorm = glm::vec3(0, -1, 0);
@@ -39,23 +48,23 @@ void Cylinder::makeTile(glm::vec3 topLeft,
 
     insertVec3(m_vertexData, topLeft);
     insertVec3(m_vertexData, topLeftNorm);
-    insertVec2(m_vertexData, glm::vec2{0.f, 1.f});
+    insertVec2(m_vertexData, topLeftTexture);
     insertVec3(m_vertexData, bottomLeft);
     insertVec3(m_vertexData, bottomLeftNorm);
-    insertVec2(m_vertexData, glm::vec2{0.f, 0.f});
+    insertVec2(m_vertexData, bottomLeftTexture);
     insertVec3(m_vertexData, topRight);
     insertVec3(m_vertexData, topRightNorm);
-    insertVec2(m_vertexData, glm::vec2{1.f, 1.f});
+    insertVec2(m_vertexData, topRightTexture);
 
     insertVec3(m_vertexData, topRight);
     insertVec3(m_vertexData, topRightNorm);
-    insertVec2(m_vertexData, glm::vec2{1.f, 1.f});
+    insertVec2(m_vertexData, topRightTexture);
     insertVec3(m_vertexData, bottomLeft);
     insertVec3(m_vertexData, bottomLeftNorm);
-    insertVec2(m_vertexData, glm::vec2{0.f, 0.f});
+    insertVec2(m_vertexData, bottomLeftTexture);
     insertVec3(m_vertexData, bottomRight);
     insertVec3(m_vertexData, bottomRightNorm);
-    insertVec2(m_vertexData, glm::vec2{1.f, 0.f});
+    insertVec2(m_vertexData, bottomRightTexture);
 }
 
 void Cylinder::setVertexData() {
@@ -67,8 +76,8 @@ void Cylinder::setVertexData() {
         };
     };
 
-    int param1 = std::max(m_param1, 1);
-    int param2 = std::max(m_param2, 3);
+    int param1 = 1;
+    int param2 = 5;
 
     float thetaStep = glm::radians(360.f / param2);
     float yStep = 1.0f / param1;
@@ -78,7 +87,7 @@ void Cylinder::setVertexData() {
         float currentTheta = i * thetaStep;
         float nextTheta = currentTheta + thetaStep;
         for (int j = 0; j < param1; j++) {
-            float currentY = j * yStep - 0.5f;
+            float currentY = j * yStep - m_y;
             float nextY = currentY + yStep;
             float currentR = j * rStep + 0.5f;
             float nextR = currentR + rStep;
@@ -89,10 +98,10 @@ void Cylinder::setVertexData() {
                      cylindrical(0.5f, nextTheta, currentY),
                      0);
             // top cap
-            makeTile(cylindrical(nextR, currentTheta, 0.5f),
-                     cylindrical(nextR, nextTheta, 0.5f),
-                     cylindrical(currentR, currentTheta, 0.5f),
-                     cylindrical(currentR, nextTheta, 0.5f),
+            makeTile(cylindrical(nextR, currentTheta, 1.f),
+                     cylindrical(nextR, nextTheta, 1.f),
+                     cylindrical(currentR, currentTheta, 1.f),
+                     cylindrical(currentR, nextTheta, 1.f),
                      1);
             // bottom cap
             makeTile(cylindrical(nextR, nextTheta, -0.5f),
