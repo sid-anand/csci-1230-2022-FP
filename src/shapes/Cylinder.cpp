@@ -46,23 +46,23 @@ void Cylinder::makeTile(glm::vec3 topLeft,
         topRightNorm = glm::vec3(0, 1, 0);
     }
 
-    insertVec3(m_vertexData, topLeft);
+    insertVec3(m_vertexData, glm::vec3{topLeft.x + m_x, topLeft.y, topLeft.z + m_z});
     insertVec3(m_vertexData, topLeftNorm);
     insertVec2(m_vertexData, topLeftTexture);
-    insertVec3(m_vertexData, bottomLeft);
+    insertVec3(m_vertexData, glm::vec3{bottomLeft.x + m_x, bottomLeft.y, bottomLeft.z + m_z});
     insertVec3(m_vertexData, bottomLeftNorm);
     insertVec2(m_vertexData, bottomLeftTexture);
-    insertVec3(m_vertexData, topRight);
+    insertVec3(m_vertexData, glm::vec3{topRight.x + m_x, topRight.y, topRight.z + m_z});
     insertVec3(m_vertexData, topRightNorm);
     insertVec2(m_vertexData, topRightTexture);
 
-    insertVec3(m_vertexData, topRight);
+    insertVec3(m_vertexData, glm::vec3{topRight.x + m_x, topRight.y, topRight.z + m_z});
     insertVec3(m_vertexData, topRightNorm);
     insertVec2(m_vertexData, topRightTexture);
-    insertVec3(m_vertexData, bottomLeft);
+    insertVec3(m_vertexData, glm::vec3{bottomLeft.x + m_x, bottomLeft.y, bottomLeft.z + m_z});
     insertVec3(m_vertexData, bottomLeftNorm);
     insertVec2(m_vertexData, bottomLeftTexture);
-    insertVec3(m_vertexData, bottomRight);
+    insertVec3(m_vertexData, glm::vec3{bottomRight.x + m_x, bottomRight.y, bottomRight.z + m_z});
     insertVec3(m_vertexData, bottomRightNorm);
     insertVec2(m_vertexData, bottomRightTexture);
 }
@@ -87,7 +87,7 @@ void Cylinder::setVertexData() {
         float currentTheta = i * thetaStep;
         float nextTheta = currentTheta + thetaStep;
         for (int j = 0; j < param1; j++) {
-            float currentY = j * yStep - m_y;
+            float currentY = j * yStep + m_y;
             float nextY = currentY + yStep;
             float currentR = j * rStep + 0.5f;
             float nextR = currentR + rStep;
@@ -98,10 +98,10 @@ void Cylinder::setVertexData() {
                      cylindrical(0.5f, nextTheta, currentY),
                      0);
             // top cap
-            makeTile(cylindrical(nextR, currentTheta, 1.f),
-                     cylindrical(nextR, nextTheta, 1.f),
-                     cylindrical(currentR, currentTheta, 1.f),
-                     cylindrical(currentR, nextTheta, 1.f),
+            makeTile(cylindrical(nextR, currentTheta, m_y + 1.f),
+                     cylindrical(nextR, nextTheta, m_y + 1.f),
+                     cylindrical(currentR, currentTheta, m_y + 1.f),
+                     cylindrical(currentR, nextTheta, m_y + 1.f),
                      1);
             // bottom cap
             makeTile(cylindrical(nextR, nextTheta, -0.5f),
