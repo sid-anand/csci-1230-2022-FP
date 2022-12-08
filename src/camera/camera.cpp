@@ -172,3 +172,9 @@ void Camera::setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point
     m_bezierPoint4 = point4;
     generateDistanceLUT();
 }
+
+std::vector<glm::vec3> Camera::getNewBezierPoints12() {
+    glm::vec3 newp1 = m_bezierPoint4;
+    glm::vec3 newp2 = (2.f * m_bezierPoint4 - m_bezierPoint3);
+    return std::vector<glm::vec3> {newp1, newp2};
+}

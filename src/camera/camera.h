@@ -38,6 +38,8 @@ public:
 
     void setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4);
 
+    std::vector<glm::vec3> getNewBezierPoints12();
+
 private:
     int m_width, m_height;
     float m_heightAngle;
