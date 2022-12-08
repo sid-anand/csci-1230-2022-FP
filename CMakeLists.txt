@@ -54,9 +54,6 @@ add_executable(${PROJECT_NAME}
     src/shapes/Building.h
     src/camera/camera.h
     src/floorplan.h
-
-    src/shapes/curvedbuilding.h
-    src/shapes/curvedbuilding.cpp
 )
 
 # GLM: this creates its library and allows you to `#include "glm/..."`
