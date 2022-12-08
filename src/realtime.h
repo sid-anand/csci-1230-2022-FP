@@ -6,6 +6,7 @@
 #include "shapes/Cone.h"
 #include "shapes/Cube.h"
 #include "shapes/Cylinder.h"
+#include "shapes/Ground.h"
 #include "shapes/Sphere.h"
 #include "utils/sceneparser.h"
 #ifdef __APPLE__
@@ -58,6 +59,7 @@ private:
 
     // Additional methods / fields
     void setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh);
+    GLuint createTexture(std::string filepath);
     void setupSkybox();
     void drawSkybox();
 
@@ -74,6 +76,12 @@ private:
     std::vector<GLuint> m_vbos;
     std::vector<GLuint> m_vaos;
     std::vector<GLuint> textures;
+    Ground m_ground;
+    GLuint m_ground_vbo;
+    GLuint m_ground_vao;
+    GLuint m_ground_texture;
+
+    int m_grid_size = 50;
 
     GLuint m_skybox_shader;
     GLuint m_skybox_vao, m_skybox_vbo, m_skybox_ebo;
