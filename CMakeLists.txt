@@ -94,6 +94,12 @@ qt6_add_resources(${PROJECT_NAME} "Resources"
         resources/images/right.png
         resources/images/bottom.png
         resources/images/top.png
+        resources/images/front-s.png
+        resources/images/back-s.png
+        resources/images/left-s.png
+        resources/images/right-s.png
+        resources/images/bottom-s.png
+        resources/images/top-s.png
         resources/images/brick.png
         resources/images/building1.png
         resources/images/building2.png

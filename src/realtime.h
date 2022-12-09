@@ -26,7 +26,6 @@ class Realtime : public QOpenGLWidget
 public:
     Realtime(QWidget *parent = nullptr);
     void finish();                                      // Called on program exit
-    void sceneChanged();
     void settingsChanged();
 
 public slots:
@@ -61,6 +60,7 @@ private:
     void setupVBOVAO(GLuint *vbo, GLuint *vao, std::vector<GLfloat> mesh);
     GLuint createTexture(std::string filepath);
     void setupSkybox();
+    void createCubemapTextureFromImages(GLuint *texture, std::vector<std::string> filepaths);
     void drawSkybox();
 
     RenderData m_renderData;
@@ -85,7 +85,7 @@ private:
 
     GLuint m_skybox_shader;
     GLuint m_skybox_vao, m_skybox_vbo, m_skybox_ebo;
-    GLuint m_cubemap_texture;
+    GLuint m_day_cubemap_texture, m_night_cubemap_texture;
 
     float m_distanceBezier;
 };

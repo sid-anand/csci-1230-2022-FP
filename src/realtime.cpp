@@ -126,7 +126,7 @@ void Realtime::initializeGL() {
             30
     };
 
-    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, 100.f);
+    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
     m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(20.f / 3.f, 5, 0), glm::vec3(40.f / 3.f, 5, 0), glm::vec3(20.f, 4, 0));
     m_distanceBezier = 0;
 }
@@ -183,21 +183,9 @@ void Realtime::resizeGL(int w, int h) {
     }
 }
 
-void Realtime::sceneChanged() {
-    SceneParser::parse(settings.sceneFilePath, m_renderData);
-    m_loadedScene = true;
-    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, settings.farPlane);
-
-    update(); // asks for a PaintGL() call to occur
-}
-
 void Realtime::settingsChanged() {
     if (!m_initializedGL) {
         return;
-    }
-
-    if (m_loadedScene) {
-        m_camera.setPlanes(settings.nearPlane, settings.farPlane);
     }
 
     update(); // asks for a PaintGL() call to occur
@@ -253,7 +241,7 @@ void Realtime::setupSkybox() {
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    std::string facesCubemap[6] =
+    std::vector<std::string> nightCubemap =
     {
         ":/resources/images/right.png",
         ":/resources/images/left.png",
@@ -263,8 +251,23 @@ void Realtime::setupSkybox() {
         ":/resources/images/back.png"
     };
 
-    glGenTextures(1, &m_cubemap_texture);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap_texture);
+    std::vector<std::string> dayCubemap =
+    {
+        ":/resources/images/right-s.png",
+        ":/resources/images/left-s.png",
+        ":/resources/images/top-s.png",
+        ":/resources/images/bottom-s.png",
+        ":/resources/images/front-s.png",
+        ":/resources/images/back-s.png"
+    };
+
+    createCubemapTextureFromImages(&m_day_cubemap_texture, dayCubemap);
+    createCubemapTextureFromImages(&m_night_cubemap_texture, nightCubemap);
+}
+
+void Realtime::createCubemapTextureFromImages(GLuint *texture, std::vector<std::string> filepaths) {
+    glGenTextures(1, texture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, *texture);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -272,7 +275,7 @@ void Realtime::setupSkybox() {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     for (int i = 0; i < 6; i++) {
-        QImage image = QImage(QString(facesCubemap[i].c_str()));
+        QImage image = QImage(QString(filepaths[i].c_str()));
         image = image.convertToFormat(QImage::Format_RGBA8888); // not mirrored
         glTexImage2D
         (
@@ -289,10 +292,6 @@ void Realtime::setupSkybox() {
     }
 
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-    glUseProgram(m_skybox_shader);
-    glUniform1i(glGetUniformLocation(m_skybox_shader, "skybox"), 0);
-    glUseProgram(0);
 }
 
 void Realtime::drawSkybox() {
@@ -305,10 +304,16 @@ void Realtime::drawSkybox() {
     glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader, "view"), 1, GL_FALSE, &view[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_skybox_shader, "projection"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
 
+    glUniform1i(glGetUniformLocation(m_skybox_shader, "daySkybox"), 0);
+    glUniform1i(glGetUniformLocation(m_skybox_shader, "nightSkybox"), 1);
+    glUniform1f(glGetUniformLocation(m_skybox_shader, "skyboxBlend"), settings.dayNight);
+
     glDisable(GL_CULL_FACE);
     glBindVertexArray(m_skybox_vao);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_cubemap_texture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_day_cubemap_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_night_cubemap_texture);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     glBindVertexArray(0);
