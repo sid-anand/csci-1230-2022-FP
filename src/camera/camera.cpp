@@ -1,3 +1,5 @@
+#include <iostream>
+#include <ostream>
 #include <stdexcept>
 #include "camera.h"
 #include "glm/ext/matrix_transform.hpp"
@@ -179,24 +181,23 @@ void Camera::updateBezierPoints(float nextBlock) {
     glm::vec3 newBezier1 = m_bezierPoint4;
     glm::vec3 newBezier2 = 2.f * m_bezierPoint4 - m_bezierPoint3;
 
-    // Say there's 4.5 btw blocks
-    // int() rounds down
-    // then 0.5, 1.5, 2.5, 3.5
-    float xDifference1 = (arc4random() % int(nextBlock)) + 0.5f;
-
     // say it's 6, then we want 6/10 to go down and 4/10 to go up
     float originalY = newBezier1[1];
-    // 1 to 10
-    int randomVal = (arc4random() % int(maxHeight)) + 1;
-    bool goUp = (randomVal > originalY);
+    bool goUp;
+    if (originalY >= maxHeight) {
+        goUp = false;
+    } else {
+        int randomVal = (arc4random() % int(maxHeight)) + 1;
+        goUp = (randomVal > originalY);
+    }
     float newBezier4Y = originalY;
     float yDifference;
     if (goUp) {
-        float maxDifference = maxHeight - originalY;
-        yDifference = (arc4random() % int(maxDifference)) + 1;
+//        std::cout<< "going up!" <<std::endl;
+        yDifference = 0.5f;
     } else {
-        float maxDifference = originalY;
-        yDifference = -((arc4random() % int(maxDifference)) + 1);
+//        std::cout<< "going down!" <<std::endl;
+        yDifference = -0.5f;
     }
     newBezier4Y += yDifference;
 
@@ -204,15 +205,30 @@ void Camera::updateBezierPoints(float nextBlock) {
 
     float newBezier4Z = z;
 
+    // Say there's 4.5 btw blocks
+    // int() rounds down
+    // then 0.5, 1.5, 2.5, 3.5
+    float xDifference1 = (nextBlock / 3.f);
+
     float newBezier3X = newBezier4X - xDifference1;
     float newBezier3Y = newBezier2[1];
     float newBezier3Z = z;
 
     glm::vec3 newBezier3 = glm::vec3(newBezier3X, newBezier3Y, newBezier3Z);
     glm::vec3 newBezier4 = glm::vec3(newBezier4X, newBezier4Y, newBezier4Z);
+//    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
+
     m_bezierPoint1 = newBezier1;
     m_bezierPoint2 = newBezier2;
     m_bezierPoint3 = newBezier3;
     m_bezierPoint4 = newBezier4;
+
+//    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
 
 }
