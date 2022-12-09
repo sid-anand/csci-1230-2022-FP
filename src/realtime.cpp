@@ -126,7 +126,7 @@ void Realtime::initializeGL() {
             30
     };
 
-    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, 100.f);
+    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
     m_camera.setBezierPoints(glm::vec3(5, 5, 5), glm::vec3(9, 2, 9), glm::vec3(9, 2, 2), glm::vec3(5, 9, 2));
     m_distanceBezier = 0;
 }
@@ -183,21 +183,9 @@ void Realtime::resizeGL(int w, int h) {
     }
 }
 
-void Realtime::sceneChanged() {
-    SceneParser::parse(settings.sceneFilePath, m_renderData);
-    m_loadedScene = true;
-    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, settings.nearPlane, settings.farPlane);
-
-    update(); // asks for a PaintGL() call to occur
-}
-
 void Realtime::settingsChanged() {
     if (!m_initializedGL) {
         return;
-    }
-
-    if (m_loadedScene) {
-        m_camera.setPlanes(settings.nearPlane, settings.farPlane);
     }
 
     update(); // asks for a PaintGL() call to occur
@@ -319,8 +307,6 @@ void Realtime::drawSkybox() {
     glUniform1i(glGetUniformLocation(m_skybox_shader, "daySkybox"), 0);
     glUniform1i(glGetUniformLocation(m_skybox_shader, "nightSkybox"), 1);
     glUniform1f(glGetUniformLocation(m_skybox_shader, "skyboxBlend"), settings.dayNight);
-
-    std::cout << settings.nearPlane << std::endl;
 
     glDisable(GL_CULL_FACE);
     glBindVertexArray(m_skybox_vao);

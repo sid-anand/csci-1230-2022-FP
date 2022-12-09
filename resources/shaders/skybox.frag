@@ -11,5 +11,5 @@ uniform float skyboxBlend;
 void main() {
     vec4 dayColor = texture(daySkybox, texCoords);
     vec4 nightColor = texture(nightSkybox, texCoords);
-    fragColor = skyboxBlend * dayColor + (1 - skyboxBlend) * nightColor;
+    fragColor = (1 - skyboxBlend) * dayColor + skyboxBlend * nightColor;
 }

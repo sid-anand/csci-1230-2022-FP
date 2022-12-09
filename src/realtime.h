@@ -26,7 +26,6 @@ class Realtime : public QOpenGLWidget
 public:
     Realtime(QWidget *parent = nullptr);
     void finish();                                      // Called on program exit
-    void sceneChanged();
     void settingsChanged();
 
 public slots:
