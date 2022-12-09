@@ -38,6 +38,8 @@ public:
 
     void setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4);
 
+    void updateBezierPoints(float nextBlock);
+
 private:
     int m_width, m_height;
     float m_heightAngle;
@@ -49,6 +51,8 @@ private:
     glm::vec3 m_bezierPoint3;
     glm::vec3 m_bezierPoint4;
     float m_bezierCurveLength;
+
+    float maxHeight = 10;
 
     glm::vec3 linearInterpolate(float t, glm::vec3 point1, glm::vec3 point2);
 
