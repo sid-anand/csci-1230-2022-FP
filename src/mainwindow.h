@@ -26,11 +26,14 @@ private:
     void connectKernelBasedFilter();
     void connectUploadFile();
     void connectExtraCredit();
+    void connectDayNight();
 
     Realtime *realtime;
     QCheckBox *filter1;
     QCheckBox *filter2;
     QPushButton *uploadFile;
+    QSlider *dayNightSlider;
+    QDoubleSpinBox *dayNightBox;
     QSlider *p1Slider;
     QSlider *p2Slider;
     QSpinBox *p1Box;
@@ -56,6 +59,8 @@ private slots:
     void onValChangeFarSlider(int newValue);
     void onValChangeNearBox(double newValue);
     void onValChangeFarBox(double newValue);
+    void onValChangeDayNightSlider(double newValue);
+    void onValChangeDayNightBox(double newValue);
 
     // Extra Credit:
     void onExtraCredit1();

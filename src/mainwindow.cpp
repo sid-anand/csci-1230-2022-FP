@@ -157,6 +157,26 @@ void MainWindow::initialize() {
     ec4->setText(QStringLiteral("Extra Credit 4"));
     ec4->setChecked(false);
 
+    QGroupBox *dayNightLayout = new QGroupBox();
+    QHBoxLayout *lDayNight = new QHBoxLayout();
+
+    dayNightSlider = new QSlider(Qt::Orientation::Horizontal);
+    dayNightSlider->setTickInterval(1);
+    dayNightSlider->setMinimum(0);
+    dayNightSlider->setMaximum(100);
+    dayNightSlider->setValue(0);
+
+    dayNightBox = new QDoubleSpinBox();
+    dayNightBox->setMinimum(0.f);
+    dayNightBox->setMaximum(1.f);
+    dayNightBox->setSingleStep(0.1f);
+    dayNightBox->setValue(0.f);
+
+    lDayNight->addWidget(dayNightSlider);
+    lDayNight->addWidget(dayNightBox);
+    dayNightLayout->setLayout(lDayNight);
+
+    vLayout->addWidget(dayNightLayout);
     vLayout->addWidget(uploadFile);
     vLayout->addWidget(tesselation_label);
     vLayout->addWidget(param1_label);
@@ -203,6 +223,7 @@ void MainWindow::connectUIElements() {
     connectNear();
     connectFar();
     connectExtraCredit();
+    connectDayNight();
 }
 
 void MainWindow::connectPerPixelFilter() {
@@ -233,6 +254,12 @@ void MainWindow::connectNear() {
     connect(nearSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeNearSlider);
     connect(nearBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeNearBox);
+}
+
+void MainWindow::connectDayNight() {
+    connect(dayNightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeDayNightSlider);
+    connect(dayNightBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+            this, &MainWindow::onValChangeDayNightBox);
 }
 
 void MainWindow::connectFar() {
@@ -313,6 +340,18 @@ void MainWindow::onValChangeFarBox(double newValue) {
     farSlider->setValue(int(newValue*100.f));
     //farBox->setValue(newValue);
     settings.farPlane = farBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeDayNightSlider(double newValue) {
+    dayNightBox->setValue(newValue/100.f);
+    settings.dayNight = dayNightBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeDayNightBox(double newValue) {
+    dayNightSlider->setValue(int(newValue*100.f));
+    settings.dayNight = dayNightBox->value();
     realtime->settingsChanged();
 }
 
