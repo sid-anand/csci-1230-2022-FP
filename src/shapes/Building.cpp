@@ -24,37 +24,37 @@ void Building::makeBuilding() {
 //    bool cluster = 0;
     // && m_size > 2 && m_depth > 2
     if ((cluster || m_size > 3 || m_depth > 3) && m_size > 2 && m_depth > 2) {
-        bool usexJitter = false;
-        bool usezJitter = false;
         m_size -= 1;
         m_x += 0.5f;
         m_depth -= 1;
         m_z += 0.5f;
-//        if (m_size > 1) {
-//            m_size -= 1;
-//            m_x += 0.5f;
-//            usexJitter = true;
-//        }
-//        if (m_depth > 1) {
-//            m_depth -= 1;
-//            m_z += 0.5f;
-//            usezJitter = true;
-//        }
+        bool cylindrical = arc4random() % 2;
         for (float i = 0.f; i < float(m_size); i++) {
             for (float k = 0.f; k < float(m_depth); k++) {
                 int towerHeight = arc4random() % m_height + 1;
-                float xjitter = float(arc4random() % 50)/50.f;
-                if (!usexJitter) {
-                    xjitter = 0.f;
+                float xjitter;
+                int xjitterDist = arc4random() % 3;
+                if (xjitterDist == 0) {
+                    xjitter = float(arc4random() % 50)/200.f;
+                } else if (xjitterDist == 1) {
+                    xjitter = float(arc4random() % 50)/50.f;
+                } else {
+                    xjitter = float(arc4random() % 50)/100.f;
                 }
-                float zjitter = float(arc4random() % 50)/50.f;
-                if (!usezJitter) {
-                    zjitter = 0.f;
+                float zjitter;
+                int zjitterDist = arc4random() % 3;
+                if (zjitterDist == 0) {
+                    zjitter = float(arc4random() % 50)/200.f;
+                } else if (zjitterDist == 1) {
+                    zjitter = float(arc4random() % 50)/50.f;
+                } else {
+                    zjitter = float(arc4random() % 50)/100.f;
                 }
+
                 i += xjitter;
                 k += zjitter;
 
-                bool cylindrical = arc4random() % 2;
+
                 int param2 = arc4random() % 3 + 3;
                 for (float j = 0.f; j < float(towerHeight); j++) {
                     if (cylindrical) {

@@ -23,11 +23,11 @@ class FloorPlan {
             // if there's enough space in that dimension, use it
             float currentSizeX = 0;
             while (currentSizeX < gridSize) {
-                int blockSize = (arc4random() % maxBlockSize) + 1;
+                int blockSize = (arc4random() % maxBlockSize) + 2;
                 while (currentSizeX + blockSize > gridSize) {
                     blockSize -= 1;
                 }
-                if (blockSize < 1) {
+                if (blockSize < 2) {
                     break;
                 }
                 blockSizesX.push_back(blockSize);
@@ -35,11 +35,11 @@ class FloorPlan {
             }
             float currentSizeZ = 0;
             while (currentSizeZ < gridSize) {
-                int blockSize = (arc4random() % maxBlockSize) + 1;
+                int blockSize = (arc4random() % maxBlockSize) + 2;
                 while (currentSizeZ + blockSize > gridSize) {
                     blockSize -= 1;
                 }
-                if (blockSize < 1) {
+                if (blockSize < 2) {
                     break;
                 }
                 blockSizesZ.push_back(blockSize);
