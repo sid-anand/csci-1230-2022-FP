@@ -104,10 +104,10 @@ void Cylinder::setVertexData() {
                      cylindrical(currentR, nextTheta, m_y + 1.f),
                      1);
             // bottom cap
-            makeTile(cylindrical(nextR, nextTheta, -0.5f),
-                     cylindrical(nextR, currentTheta, -0.5f),
-                     cylindrical(currentR, nextTheta, -0.5f),
-                     cylindrical(currentR, currentTheta, -0.5f),
+            makeTile(cylindrical(nextR, nextTheta, m_y),
+                     cylindrical(nextR, currentTheta, m_y),
+                     cylindrical(currentR, nextTheta, m_y),
+                     cylindrical(currentR, currentTheta, m_y),
                      -1);
         }
     }

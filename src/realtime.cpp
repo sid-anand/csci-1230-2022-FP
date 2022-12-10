@@ -90,13 +90,21 @@ void Realtime::initializeGL() {
 
     std::vector<std::string> filepaths;
     filepaths.push_back(":/resources/images/building1.png");
+
     filepaths.push_back(":/resources/images/building2.png");
+
     filepaths.push_back(":/resources/images/building3.png");
+
     filepaths.push_back(":/resources/images/building4.png");
+
     filepaths.push_back(":/resources/images/building5.png");
+
     filepaths.push_back(":/resources/images/building6.png");
+
     filepaths.push_back(":/resources/images/building7.png");
+
     filepaths.push_back(":/resources/images/building8.png");
+
 
     for (int i = 0; i < filepaths.size(); i++) {
         GLuint texture = createTexture(filepaths[i]);

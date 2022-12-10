@@ -20,42 +20,20 @@ void Building::makeBuilding() {
     Cylinder cylinder = Cylinder();
 
     m_vertexData.clear();
-    bool cluster = arc4random() % 2;
-//    bool cluster = 0;
-    // && m_size > 2 && m_depth > 2
+
+    bool cluster = 0;
     if ((cluster || m_size > 3 || m_depth > 3) && m_size > 2 && m_depth > 2) {
-        m_size -= 1;
-        m_x += 0.5f;
-        m_depth -= 1;
-        m_z += 0.5f;
-
-        for (float i = 0.f; i < float(m_size); i++) {
-            for (float k = 0.f; k < float(m_depth); k++) {
-                int towerHeight = arc4random() % m_height + 1;
-                float xjitter;
-                int xjitterDist = arc4random() % 3;
-                if (xjitterDist == 0) {
-                    xjitter = float(arc4random() % 50)/200.f;
-                } else if (xjitterDist == 1) {
-                    xjitter = float(arc4random() % 50)/50.f;
-                } else {
-                    xjitter = float(arc4random() % 50)/100.f;
-                }
-                float zjitter;
-                int zjitterDist = arc4random() % 3;
-                if (zjitterDist == 0) {
-                    zjitter = float(arc4random() % 50)/200.f;
-                } else if (zjitterDist == 1) {
-                    zjitter = float(arc4random() % 50)/50.f;
-                } else {
-                    zjitter = float(arc4random() % 50)/100.f;
-                }
-
+        for (float i = 0.f; i < float(m_size) - 0.5f; i++) {
+            for (float k = 0.f; k < float(m_depth) - 0.5f; k++) {
+                int towerHeight = std::rand() % m_height + 1;
+                float xjitter = float(arc4random() % 50)/100.f;
+                float zjitter = float(arc4random() % 50)/100.f;
                 i += xjitter;
                 k += zjitter;
-                bool cylindrical = arc4random() % 2;
 
+                bool cylindrical = arc4random() % 2;
                 int param2 = arc4random() % 3 + 3;
+
                 for (float j = 0.f; j < float(towerHeight); j++) {
                     if (cylindrical) {
                         cylinder.updateParams(1, param2, i + m_x, j, k + m_z, 0.5f);
@@ -72,12 +50,6 @@ void Building::makeBuilding() {
     } else {
         float xjitter = float(arc4random() % 50)/100.f;
         float zjitter = float(arc4random() % 50)/100.f;
-        if (arc4random() % 2 == 0) {
-            xjitter = -xjitter;
-        }
-        if (arc4random() % 2 == 0) {
-            zjitter = -zjitter;
-        }
         m_x += xjitter;
         m_z += zjitter;
 
