@@ -116,9 +116,9 @@ void Realtime::initializeGL() {
     for(int i = 0; i < m_buildings.size(); i++){
         GLuint currVBO;
         GLuint currVAO;
+        setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
         m_vbos.push_back(currVBO);
         m_vaos.push_back(currVAO);
-        setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
     }
 
     glUseProgram(m_phong_shader);
