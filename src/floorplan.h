@@ -67,12 +67,11 @@ class FloorPlan {
             }
 
 
-
 //            for (float bi = 0.f; bi <= gridSize; bi += (blockSize + streetSize)) {
 //                for (float bk = 0.f; bk >= -gridSize; bk -= (blockSize + streetSize)) {
 //                    float buildingHeight = arc4random() % maxHeight + 1;
 //                    Building building = Building();
-//                    building.updateParams(1, blockSize, buildingHeight, blockSize, bi, bk, arc4random() % numTextures);
+//                    building.updateParams(1, 5, buildingHeight, 5, bi, bk, arc4random() % numTextures);
 //                    buildings.push_back(building);
 //                }
 //            }

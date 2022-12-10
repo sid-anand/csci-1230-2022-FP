@@ -4,9 +4,9 @@ void Cylinder::updateParams(int param1, int param2, float x, float y, float z, f
     m_vertexData = std::vector<float>();
     m_param1 = param1;
     m_param2 = param2;
-    m_x = x;
+    m_x = x + radius;
     m_y = y;
-    m_z = z;
+    m_z = z + radius;
     m_radius = radius;
     setVertexData();
 }

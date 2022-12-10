@@ -28,7 +28,7 @@ void Building::makeBuilding() {
         m_x += 0.5f;
         m_depth -= 1;
         m_z += 0.5f;
-        bool cylindrical = arc4random() % 2;
+
         for (float i = 0.f; i < float(m_size); i++) {
             for (float k = 0.f; k < float(m_depth); k++) {
                 int towerHeight = arc4random() % m_height + 1;
@@ -53,7 +53,7 @@ void Building::makeBuilding() {
 
                 i += xjitter;
                 k += zjitter;
-
+                bool cylindrical = arc4random() % 2;
 
                 int param2 = arc4random() % 3 + 3;
                 for (float j = 0.f; j < float(towerHeight); j++) {
