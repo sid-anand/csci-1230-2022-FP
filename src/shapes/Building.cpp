@@ -8,7 +8,7 @@ void Building::updateParams(int param1, int size, int height, int depth, float x
     m_param1 = param1;
     m_size = size;
     m_depth = depth;
-    m_height = height;
+    m_height = 10;
     m_x = x;
     m_z = z;
     m_texture = texture;
@@ -22,7 +22,8 @@ void Building::makeBuilding() {
     m_vertexData.clear();
 
     bool cluster = 0;
-    if ((cluster || m_size > 3 || m_depth > 3) && m_size > 2 && m_depth > 2) {
+    // (cluster || m_size > 3 || m_depth > 3) && m_size > 2 && m_depth > 2)
+    if (cluster) {
         for (float i = 0.f; i < float(m_size) - 0.5f; i++) {
             for (float k = 0.f; k < float(m_depth) - 0.5f; k++) {
                 int towerHeight = std::rand() % m_height + 1;
@@ -32,7 +33,7 @@ void Building::makeBuilding() {
                 k += zjitter;
 
                 bool cylindrical = arc4random() % 2;
-                int param2 = arc4random() % 3 + 3;
+                int param2 = (arc4random() % 3) + 3;
 
                 for (float j = 0.f; j < float(towerHeight); j++) {
                     if (cylindrical) {
@@ -48,16 +49,17 @@ void Building::makeBuilding() {
             }
         }
     } else {
-        float xjitter = float(arc4random() % 50)/100.f;
-        float zjitter = float(arc4random() % 50)/100.f;
-        m_x += xjitter;
-        m_z += zjitter;
+//        float xjitter = float(arc4random() % 50)/100.f;
+//        float zjitter = float(arc4random() % 50)/100.f;
+//        m_x += xjitter;
+//        m_z += zjitter;
 
-        for (float i = 0.f; i < float(m_size); i++) {
-            for (float k = 0.f; k < float(m_depth); k++) {
-                int towerHeight = arc4random() % m_height + 1;
-                for (float j = 0.f; j < float(towerHeight); j++) {
-                    cube.updateParams(1, i + m_x, j, k + m_z);
+        int towerHeight = arc4random() % m_height + 1;
+
+        for (int i = 0.f; i < m_size; i++) {
+            for (int k = 0.f; k < m_depth; k++) {                
+                for (int j = 0.f; j < towerHeight; j++) {
+                    cube.updateParams(1, float(i) + m_x, float(j), float(k) + m_z);
                     std::vector<float> cube_data = cube.getMesh();
                     m_vertexData.insert(m_vertexData.end(), cube_data.begin(), cube_data.end());
                 }

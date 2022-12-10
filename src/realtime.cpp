@@ -11,6 +11,7 @@
 #include "utils/sceneparser.h"
 #include "utils/shaderloader.h"
 #include "glm/gtx/string_cast.hpp"
+#include<unistd.h>
 
 // ================== Project 5: Lights, Camera
 
@@ -71,6 +72,7 @@ void Realtime::initializeGL() {
     glEnable(GL_DEPTH_TEST);
     // Tells OpenGL to only draw the front face
     glEnable(GL_CULL_FACE);
+
     // Tells OpenGL how big the screen is
     glViewport(0, 0, size().width() * m_devicePixelRatio, size().height() * m_devicePixelRatio);
 
@@ -90,19 +92,12 @@ void Realtime::initializeGL() {
 
     std::vector<std::string> filepaths;
     filepaths.push_back(":/resources/images/building1.png");
-
     filepaths.push_back(":/resources/images/building2.png");
-
     filepaths.push_back(":/resources/images/building3.png");
-
     filepaths.push_back(":/resources/images/building4.png");
-
     filepaths.push_back(":/resources/images/building5.png");
-
     filepaths.push_back(":/resources/images/building6.png");
-
     filepaths.push_back(":/resources/images/building7.png");
-
     filepaths.push_back(":/resources/images/building8.png");
 
 
