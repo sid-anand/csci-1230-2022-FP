@@ -150,10 +150,12 @@ void Realtime::paintGL() {
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "proj"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
 
     // simulating the moonlight
-    glm::vec4 lightDirection = glm::vec4(1, -3, -2, 0);
+    glm::vec4 light1Direction = glm::vec4(1, -3, -2, 0);
+    glm::vec4 light2Direction = glm::vec4(-1, -3, 2, 0);
     glm::vec4 lightColor = glm::vec4(1, 1, 1, 1);
     glUniform4fv(glGetUniformLocation(m_phong_shader, "cameraPos"), 1, &m_camera.getPos()[0]);
-    glUniform4fv(glGetUniformLocation(m_phong_shader, "lightDirection"), 1, &lightDirection[0]);
+    glUniform4fv(glGetUniformLocation(m_phong_shader, "light1Direction"), 1, &light1Direction[0]);
+    glUniform4fv(glGetUniformLocation(m_phong_shader, "light2Direction"), 1, &light2Direction[0]);
     glUniform4fv(glGetUniformLocation(m_phong_shader, "lightColor"), 1, &lightColor[0]);
 
     glBindVertexArray(m_ground_vao);
