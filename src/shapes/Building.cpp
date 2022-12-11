@@ -21,11 +21,11 @@ void Building::makeBuilding() {
 
     m_vertexData.clear();
 
-    bool cluster = 0;
+    bool cluster = arc4random() % 2;
     if ((cluster || m_size > 3 || m_depth > 3) && m_size > 2 && m_depth > 2) {
         for (float i = 0.f; i < float(m_size) - 0.5f; i++) {
             for (float k = 0.f; k < float(m_depth) - 0.5f; k++) {
-                int towerHeight = std::rand() % m_height + 1;
+                int towerHeight = arc4random() % m_height + 1;
                 float xjitter = float(arc4random() % 50)/100.f;
                 float zjitter = float(arc4random() % 50)/100.f;
                 i += xjitter;
