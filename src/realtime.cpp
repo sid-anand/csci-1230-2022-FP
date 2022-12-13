@@ -131,7 +131,7 @@ void Realtime::initializeGL() {
     setupSkybox();
 
     m_renderData.cameraData = SceneCameraData{
-            glm::vec4(0, 0, 0, 1),
+            glm::vec4(0, 6, 0, 1),
             glm::vec4(0, 0, -1, 0),
             glm::vec4(0, 1, 0, 0),
             30
@@ -143,6 +143,7 @@ void Realtime::initializeGL() {
         totalX += blockSizesX[blockSizesXIndex];
         blockSizesXIndex += 1;
     }
+    goingForwardX = true;
     m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(totalX / 3.f, 5, 0), glm::vec3(totalX * 2.f / 3.f, 5, 0), glm::vec3(totalX, 4, 0));
     m_distanceBezier = 0;
 }
@@ -452,14 +453,30 @@ void Realtime::timerEvent(QTimerEvent *event) {
     } else if (m_keyMap[Qt::Key_G]) {
         m_distanceBezier += deltaTime / 5.f;
         if (m_distanceBezier > 1) {
-            m_distanceBezier = 0;
-            float totalX = 0;
-            for (int i = 0; i < 5; i++) {
-                totalX += blockSizesX[blockSizesXIndex];
-                blockSizesXIndex += 1;
-            }
             std::cout<< "next bezier curve" <<std::endl;
-            m_camera.updateBezierPoints(totalX);
+            m_distanceBezier = 0;
+            if (blockSizesXIndex > 9 && goingForwardX == true) {
+                std::cout<< "turning to go backwards" <<std::endl;
+                float zChange = blockSizesZ[0];
+                m_camera.updateBezierPoints(zChange, true);
+                goingForwardX = false;
+            } else if (blockSizesXIndex == -1 && goingForwardX == false) {
+                std::cout<< "turning to go forwards" <<std::endl;
+                float zChange = blockSizesZ[1];
+                m_camera.updateBezierPoints(zChange, true);
+                goingForwardX = true;
+            } else {
+                float totalX = 0;
+                for (int i = 0; i < 5; i++) {
+                    totalX += blockSizesX[blockSizesXIndex];
+                    if (goingForwardX == false) {
+                        blockSizesXIndex -= 1;
+                    } else {
+                        blockSizesXIndex += 1;
+                    }
+                }
+                m_camera.updateBezierPoints(totalX, false);
+            }
         }
         m_camera.moveAlongBezierCurve(m_distanceBezier);
     }

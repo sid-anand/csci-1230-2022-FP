@@ -9,7 +9,7 @@ class FloorPlan {
     public:
         std::vector<Building> buildings;
         const float streetSize = 1.0f;
-        const int maxHeight = 10;
+        const int maxHeight = 3;
         const int maxBlockSize = 4;
         std::vector<int> blockSizesX;
         std::vector<int> blockSizesZ;

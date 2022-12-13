@@ -175,54 +175,74 @@ void Camera::setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point
     generateDistanceLUT();
 }
 
-void Camera::updateBezierPoints(float nextBlock) {
-    // for now, keep Z constant
-    float z = m_bezierPoint4[2];
+void Camera::updateBezierPoints(float nextBlock, bool isTurning) {
     glm::vec3 newBezier1 = m_bezierPoint4;
     glm::vec3 newBezier2 = 2.f * m_bezierPoint4 - m_bezierPoint3;
+    glm::vec3 newBezier3;
+    glm::vec3 newBezier4;
 
-    float originalY = newBezier1[1];
-    bool goUp;
-    if (originalY >= maxHeight) {
-        goUp = false;
+    if (!isTurning) {
+        float z = m_bezierPoint4[2];
+        float originalY = newBezier1[1];
+        bool goUp;
+        if (originalY >= maxHeight) {
+            goUp = false;
+        } else {
+            int randomVal = (arc4random() % int(maxHeight)) + 1;
+            goUp = (randomVal > originalY);
+        }
+        float newBezier4Y = originalY;
+        float yDifference;
+        if (goUp) {
+            yDifference = 0.5f;
+        } else {
+            yDifference = -0.5f;
+        }
+        newBezier4Y += yDifference;
+
+        if (!isGoingForwardX) {
+            nextBlock = -nextBlock;
+        }
+        float newBezier4X = newBezier1[0] + nextBlock;
+
+        float newBezier4Z = z;
+
+        float xDifference1 = (nextBlock / 3.f);
+
+        float newBezier3X = newBezier4X - xDifference1;
+        float newBezier3Y = newBezier2[1];
+        float newBezier3Z = z;
+
+        newBezier3 = glm::vec3(newBezier3X, newBezier3Y, newBezier3Z);
+        newBezier4 = glm::vec3(newBezier4X, newBezier4Y, newBezier4Z);
     } else {
-        int randomVal = (arc4random() % int(maxHeight)) + 1;
-        goUp = (randomVal > originalY);
+        float newBezier4X = newBezier1[0];
+        float newBezier4Y = newBezier2[1];
+
+        float newBezier4Z = newBezier1[2] - nextBlock;
+
+        float newBezier3X = newBezier2[0];
+        float newBezier3Y = newBezier2[1];
+        float newBezier3Z = newBezier4Z;
+
+        newBezier3 = glm::vec3(newBezier3X, newBezier3Y, newBezier3Z);
+        newBezier4 = glm::vec3(newBezier4X, newBezier4Y, newBezier4Z);
+        isGoingForwardX = false;
+
     }
-    float newBezier4Y = originalY;
-    float yDifference;
-    if (goUp) {
-        yDifference = 0.5f;
-    } else {
-        yDifference = -0.5f;
-    }
-    newBezier4Y += yDifference;
-
-    float newBezier4X = newBezier1[0] + nextBlock;
-
-    float newBezier4Z = z;
-
-    float xDifference1 = (nextBlock / 3.f);
-
-    float newBezier3X = newBezier4X - xDifference1;
-    float newBezier3Y = newBezier2[1];
-    float newBezier3Z = z;
-
-    glm::vec3 newBezier3 = glm::vec3(newBezier3X, newBezier3Y, newBezier3Z);
-    glm::vec3 newBezier4 = glm::vec3(newBezier4X, newBezier4Y, newBezier4Z);
-//    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
-//    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
-//    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
-//    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
 
     m_bezierPoint1 = newBezier1;
     m_bezierPoint2 = newBezier2;
     m_bezierPoint3 = newBezier3;
     m_bezierPoint4 = newBezier4;
 
-//    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
-//    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
-//    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
-//    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
+    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
 
 }

@@ -38,7 +38,7 @@ public:
 
     void setBezierPoints(glm::vec3 point1, glm::vec3 point2, glm::vec3 point3, glm::vec3 point4);
 
-    void updateBezierPoints(float nextBlock);
+    void updateBezierPoints(float nextBlock, bool isTurning);
 
 private:
     int m_width, m_height;
@@ -51,6 +51,7 @@ private:
     glm::vec3 m_bezierPoint3;
     glm::vec3 m_bezierPoint4;
     float m_bezierCurveLength;
+    bool isGoingForwardX = true;
 
     float maxHeight = 10;
 
