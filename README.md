@@ -1,7 +1,7 @@
 # CSCI 1230 Final Project (Team Name: Just Phong-Blinn Around)
 
 ## How to Use
-After running the project in QT Creator, you will be placed in the middle of the procedural city. 
+After running the project in Qt Creator, you will be placed in the middle of the procedural city. 
 
 You can use the following controls to move around (same as the Realtime projects):
 * W: Translates the camera in the direction of the look vector
