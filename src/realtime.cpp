@@ -149,15 +149,27 @@ void Realtime::paintGL() {
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "proj"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
 
-    // simulating the moonlight
-    glm::vec4 light1Direction = glm::vec4(1, -3, -2, 0);
-    glm::vec4 light2Direction = glm::vec4(-1, -3, 2, 0);
-    glm::vec4 lightColor = glm::vec4(1, 1, 1, 1);
+//    // simulating the moonlight
+//    glm::vec4 light1Direction = glm::vec4(1, -3, -2, 0);
+//    glm::vec4 light2Direction = glm::vec4(-1, -3, 2, 0);
+//    glm::vec4 light1Color = glm::vec4(1, 1, 1, 1);
+////    glm::vec4 light2Color = glm::vec4(0.2, 0.2, 0.2, 1);
+//    glm::vec4 light2Color = glm::vec4(0, 0.2, 0.2, 1);
+
+    // moonlight
+    glm::vec4 light1Direction = glm::vec4(-0.5, -1, -1, 0);
+    glm::vec4 light1Color = glm::vec4(1, 1, 1, 1);
+    // secondary opposing light
+    glm::vec4 light2Direction = glm::vec4(0.5, -1, 1, 0);
+    glm::vec4 light2Color = glm::vec4(0.2, 0.2, 0.2, 1);
+
     glUniform4fv(glGetUniformLocation(m_phong_shader, "cameraPos"), 1, &m_camera.getPos()[0]);
     glUniform4fv(glGetUniformLocation(m_phong_shader, "light1Direction"), 1, &light1Direction[0]);
     glUniform4fv(glGetUniformLocation(m_phong_shader, "light2Direction"), 1, &light2Direction[0]);
-    glUniform4fv(glGetUniformLocation(m_phong_shader, "lightColor"), 1, &lightColor[0]);
+    glUniform4fv(glGetUniformLocation(m_phong_shader, "light1Color"), 1, &light1Color[0]);
+    glUniform4fv(glGetUniformLocation(m_phong_shader, "light2Color"), 1, &light2Color[0]);
 
+    glUniform1i(glGetUniformLocation(m_phong_shader, "isShiny"), false);
     glBindVertexArray(m_ground_vao);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_ground_texture);
@@ -165,6 +177,7 @@ void Realtime::paintGL() {
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
 
+    glUniform1i(glGetUniformLocation(m_phong_shader, "isShiny"), true);
     for (int i = 0; i < m_buildings.size(); i++) {
         Building building = m_buildings[i];
         GLuint buildingVAO = m_vaos[i];
