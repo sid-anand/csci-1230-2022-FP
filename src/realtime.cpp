@@ -135,28 +135,7 @@ void Realtime::initializeGL() {
 
     setupSkybox();
 
-    float totalX = 0;
-    float startingX = 0;
-    float startingZ = 0;
-    blockSizesXIndex = 5;
-    blockSizesZIndex = 5;
-    for (int i = 0; i < 5; i++) {
-        totalX += blockSizesX[blockSizesXIndex];
-        blockSizesXIndex += 1;
-        startingX += (blockSizesX[i] + 1);
-        startingZ -= (blockSizesZ[i] + 1);
-    }
-    m_renderData.cameraData = SceneCameraData{
-            glm::vec4(startingX, 6, startingZ, 1),
-            glm::vec4(glm::normalize(glm::vec3(totalX / 3.f, -1, 0)), 0),
-            glm::vec4(0, 1, 0, 0),
-            30
-    };
-
-    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
-    goingForwardX = true;
-    m_camera.setBezierPoints(glm::vec3(startingX, 6, startingZ), glm::vec3(totalX / 3.f + startingX, 5, startingZ), glm::vec3(totalX * 2.f / 3.f + startingX, 5, startingZ), glm::vec3(totalX + startingX, 4, startingZ));
-    m_distanceBezier = 0;
+    resetBezier();
 }
 
 void Realtime::rebuildFloorplan(int maxHeight) {
@@ -181,6 +160,10 @@ void Realtime::rebuildFloorplan(int maxHeight) {
         m_building_vbos.push_back(currVBO);
         m_building_vaos.push_back(currVAO);
     }
+    blockSizesX.clear();
+    blockSizesZ.clear();
+    blockSizesX = fp.blockSizesX;
+    blockSizesZ = fp.blockSizesZ;
 }
 
 void Realtime::paintGL() {
@@ -251,6 +234,7 @@ void Realtime::settingsChanged() {
     if (settings.maxHeight != m_lastMaxHeight) {
         rebuildFloorplan(settings.maxHeight);
         m_lastMaxHeight = settings.maxHeight;
+        resetBezier();
     }
 
     update(); // asks for a PaintGL() call to occur
@@ -511,4 +495,29 @@ void Realtime::timerEvent(QTimerEvent *event) {
     }
 
     update(); // asks for a PaintGL() call to occur
+}
+
+void Realtime::resetBezier() {
+    float totalX = 0;
+    float startingX = 0;
+    float startingZ = 0;
+    blockSizesXIndex = 5;
+    blockSizesZIndex = 5;
+    for (int i = 0; i < 5; i++) {
+        totalX += blockSizesX[blockSizesXIndex];
+        blockSizesXIndex += 1;
+        startingX += (blockSizesX[i] + 1);
+        startingZ -= (blockSizesZ[i] + 1);
+    }
+    m_renderData.cameraData = SceneCameraData{
+            glm::vec4(startingX, 6, startingZ, 1),
+            glm::vec4(glm::normalize(glm::vec3(totalX / 3.f, -1, 0)), 0),
+            glm::vec4(0, 1, 0, 0),
+            30
+    };
+
+    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
+    goingForwardX = true;
+    m_camera.setBezierPoints(glm::vec3(startingX, 6, startingZ), glm::vec3(totalX / 3.f + startingX, 5, startingZ), glm::vec3(totalX * 2.f / 3.f + startingX, 5, startingZ), glm::vec3(totalX + startingX, 4, startingZ));
+    m_distanceBezier = 0;
 }

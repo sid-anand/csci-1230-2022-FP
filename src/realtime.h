@@ -95,4 +95,5 @@ private:
     int blockSizesZIndex = 0;
     bool goingForwardX;
     int m_lastMaxHeight = 10;
+    void resetBezier();
 };
