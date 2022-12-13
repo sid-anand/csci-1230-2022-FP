@@ -15,7 +15,7 @@ You can use the following controls to move around (same as the Realtime projects
 We also added some new controls specific to this project:
 * G: Holding it down causes the camera to follow a smooth tour of the city based on Bezier curves
 * Slider labeled "Day to Night": Sliding it from left to right smoothly transitions the time of day from day to night
-* Slider labeled "Max Building Height": Sliding it from left to right increases the **maximum** building height and regenerates the floor plan. Changing the value of this slider also resets the camera to its original position (5 blocks into the city) and height).
+* Slider labeled "Max Building Height": Sliding it from left to right increases the **maximum** building height and regenerates the floor plan. Changing the value of this slider also resets the camera to its original position (5 blocks into the city) and height.
 
 ## Known Bugs
 Increasing the maximum building height increases the probability that the Bezier camera path will collide with a building upon turning and proceed to go through it, rather than navigating around it.
