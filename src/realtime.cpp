@@ -130,14 +130,6 @@ void Realtime::initializeGL() {
 
     setupSkybox();
 
-    m_renderData.cameraData = SceneCameraData{
-            glm::vec4(0, 6, 0, 1),
-            glm::vec4(0, 0, -1, 0),
-            glm::vec4(0, 1, 0, 0),
-            30
-    };
-
-    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
     float totalX = 0;
     float startingX = 0;
     float startingZ = 0;
@@ -149,6 +141,14 @@ void Realtime::initializeGL() {
         startingX += (blockSizesX[i] + 1);
         startingZ -= (blockSizesZ[i] + 1);
     }
+    m_renderData.cameraData = SceneCameraData{
+            glm::vec4(startingX, 6, startingZ, 1),
+            glm::vec4(glm::normalize(glm::vec3(totalX / 3.f, -1, 0)), 0),
+            glm::vec4(0, 1, 0, 0),
+            30
+    };
+
+    m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
     goingForwardX = true;
     m_camera.setBezierPoints(glm::vec3(startingX, 6, startingZ), glm::vec3(totalX / 3.f + startingX, 5, startingZ), glm::vec3(totalX * 2.f / 3.f + startingX, 5, startingZ), glm::vec3(totalX + startingX, 4, startingZ));
     m_distanceBezier = 0;
@@ -457,19 +457,15 @@ void Realtime::timerEvent(QTimerEvent *event) {
     } else if (m_keyMap[Qt::Key_Control] || m_keyMap[Qt::Key_Meta]) {
         m_camera.translate(CameraDirection::DOWN, deltaTime);
     } else if (m_keyMap[Qt::Key_G]) {
-        m_distanceBezier += deltaTime / 5.f;
+        m_distanceBezier += deltaTime / 3.f;
         if (m_distanceBezier > 1) {
             m_distanceBezier = 0;
-            if (blockSizesXIndex > 14 && goingForwardX == true) {
-                float zChange = blockSizesZ[blockSizesZIndex] + 1.0;
+            // 14 and 6 are so it goes exactly 2 blocks every time then turns
+            if ((blockSizesXIndex > 14 && goingForwardX == true) or (blockSizesXIndex < 6 && goingForwardX == false)) {
+                float zChange = blockSizesZ[blockSizesZIndex] + 1.1;
                 blockSizesZIndex += 1;
                 m_camera.updateBezierPoints(zChange, true);
-                goingForwardX = false;
-            } else if (blockSizesXIndex < 6 && goingForwardX == false) {
-                float zChange = blockSizesZ[blockSizesZIndex] + 1.0;
-                blockSizesZIndex += 1;
-                m_camera.updateBezierPoints(zChange, true);
-                goingForwardX = true;
+                goingForwardX = !goingForwardX;
             } else {
                 float totalX = 0;
                 for (int i = 0; i < 5; i++) {
