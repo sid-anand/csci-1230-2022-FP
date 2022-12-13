@@ -23,8 +23,11 @@ void MainWindow::initialize() {
     font.setPointSize(12);
     font.setBold(true);
     QLabel *skybox_label = new QLabel();
-    skybox_label->setText("Skybox");
+    skybox_label->setText("Day to Night");
     skybox_label->setFont(font);
+    QLabel *height_label = new QLabel();
+    height_label->setText("Max Building Height");
+    height_label->setFont(font);
 
     QGroupBox *dayNightLayout = new QGroupBox();
     QHBoxLayout *lDayNight = new QHBoxLayout();
@@ -45,13 +48,35 @@ void MainWindow::initialize() {
     lDayNight->addWidget(dayNightBox);
     dayNightLayout->setLayout(lDayNight);
 
+    QGroupBox *maxHeightLayout = new QGroupBox();
+    QHBoxLayout *lMaxHeight = new QHBoxLayout();
+
+    maxHeightSlider = new QSlider(Qt::Orientation::Horizontal);
+    maxHeightSlider->setTickInterval(1);
+    maxHeightSlider->setMinimum(1);
+    maxHeightSlider->setMaximum(20);
+    maxHeightSlider->setValue(10);
+
+    maxHeightBox = new QSpinBox();
+    maxHeightBox->setMinimum(1);
+    maxHeightBox->setMaximum(20);
+    maxHeightBox->setSingleStep(1);
+    maxHeightBox->setValue(10);
+
+    lMaxHeight->addWidget(maxHeightSlider);
+    lMaxHeight->addWidget(maxHeightBox);
+    maxHeightLayout->setLayout(lMaxHeight);
+
     vLayout->addWidget(skybox_label);
     vLayout->addWidget(dayNightLayout);
+    vLayout->addWidget(height_label);
+    vLayout->addWidget(maxHeightLayout);
 
     connectUIElements();
 
     // Set default values
     onValChangeDayNightBox(0.f);
+    onValChangeMaxHeight(10);
 }
 
 void MainWindow::finish() {
@@ -61,12 +86,19 @@ void MainWindow::finish() {
 
 void MainWindow::connectUIElements() {
     connectDayNight();
+    connectMaxHeight();
 }
 
 void MainWindow::connectDayNight() {
     connect(dayNightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeDayNightSlider);
     connect(dayNightBox, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onValChangeDayNightBox);
+}
+
+void MainWindow::connectMaxHeight() {
+    connect(maxHeightSlider, &QSlider::valueChanged, this, &MainWindow::onValChangeMaxHeight);
+    connect(maxHeightBox, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, &MainWindow::onValChangeMaxHeight);
 }
 
 void MainWindow::onValChangeDayNightSlider(double newValue) {
@@ -78,5 +110,12 @@ void MainWindow::onValChangeDayNightSlider(double newValue) {
 void MainWindow::onValChangeDayNightBox(double newValue) {
     dayNightSlider->setValue(int(newValue*100.f));
     settings.dayNight = dayNightBox->value();
+    realtime->settingsChanged();
+}
+
+void MainWindow::onValChangeMaxHeight(int newValue) {
+    maxHeightSlider->setValue(newValue);
+    maxHeightBox->setValue(newValue);
+    settings.maxHeight = maxHeightSlider->value();
     realtime->settingsChanged();
 }

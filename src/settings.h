@@ -5,6 +5,7 @@
 
 struct Settings {
     float dayNight = 0;
+    int maxHeight = 10;
 };
 
 

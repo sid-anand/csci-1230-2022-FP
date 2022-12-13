@@ -19,12 +19,16 @@ public:
 private:
     void connectUIElements();
     void connectDayNight();
+    void connectMaxHeight();
 
     Realtime *realtime;
     QSlider *dayNightSlider;
     QDoubleSpinBox *dayNightBox;
+    QSlider *maxHeightSlider;
+    QSpinBox *maxHeightBox;
 
 private slots:
     void onValChangeDayNightSlider(double newValue);
     void onValChangeDayNightBox(double newValue);
+    void onValChangeMaxHeight(int newValue);
 };

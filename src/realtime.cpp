@@ -37,15 +37,28 @@ void Realtime::finish() {
 
     // Students: anything requiring OpenGL calls when the program exits should be done here
 
-    for (GLuint vbo : m_vbos) {
+    for (GLuint vbo : m_building_vbos) {
         glDeleteBuffers(1, &vbo);
     }
-
-    for (GLuint vao : m_vaos) {
+    for (GLuint vao : m_building_vaos) {
         glDeleteVertexArrays(1, &vao);
     }
+    for (GLuint texture : m_building_textures) {
+        glDeleteTextures(1, &texture);
+    }
+
+    glDeleteBuffers(1, &m_skybox_vbo);
+    glDeleteVertexArrays(1, &m_skybox_vao);
+    glDeleteBuffers(1, &m_skybox_ebo);
+    glDeleteTextures(1, &m_day_cubemap_texture);
+    glDeleteTextures(1, &m_night_cubemap_texture);
+
+    glDeleteBuffers(1, &m_ground_vbo);
+    glDeleteVertexArrays(1, &m_ground_vao);
+    glDeleteTextures(1, &m_ground_texture);
 
     glDeleteProgram(m_phong_shader);
+    glDeleteProgram(m_skybox_shader);
 
     this->doneCurrent();
 }
@@ -90,28 +103,20 @@ void Realtime::initializeGL() {
 
     std::vector<std::string> filepaths;
     filepaths.push_back(":/resources/images/building1.png");
-
     filepaths.push_back(":/resources/images/building2.png");
-
     filepaths.push_back(":/resources/images/building3.png");
-
     filepaths.push_back(":/resources/images/building4.png");
-
     filepaths.push_back(":/resources/images/building5.png");
-
     filepaths.push_back(":/resources/images/building6.png");
-
     filepaths.push_back(":/resources/images/building7.png");
-
     filepaths.push_back(":/resources/images/building8.png");
-
 
     for (int i = 0; i < filepaths.size(); i++) {
         GLuint texture = createTexture(filepaths[i]);
-        textures.push_back(texture);
+        m_building_textures.push_back(texture);
     }
 
-    FloorPlan fp = FloorPlan(m_grid_size, filepaths.size());
+    FloorPlan fp = FloorPlan(m_grid_size, filepaths.size(), 10);
     m_buildings = fp.buildings;
     blockSizesX = fp.blockSizesX;
     blockSizesZ = fp.blockSizesZ;
@@ -120,8 +125,8 @@ void Realtime::initializeGL() {
         GLuint currVBO;
         GLuint currVAO;
         setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
-        m_vbos.push_back(currVBO);
-        m_vaos.push_back(currVAO);
+        m_building_vbos.push_back(currVBO);
+        m_building_vaos.push_back(currVAO);
     }
 
     glUseProgram(m_phong_shader);
@@ -154,6 +159,30 @@ void Realtime::initializeGL() {
     m_distanceBezier = 0;
 }
 
+void Realtime::rebuildFloorplan(int maxHeight) {
+    std::vector<std::string> filepaths;
+    filepaths.push_back(":/resources/images/building1.png");
+    filepaths.push_back(":/resources/images/building2.png");
+    filepaths.push_back(":/resources/images/building3.png");
+    filepaths.push_back(":/resources/images/building4.png");
+    filepaths.push_back(":/resources/images/building5.png");
+    filepaths.push_back(":/resources/images/building6.png");
+    filepaths.push_back(":/resources/images/building7.png");
+    filepaths.push_back(":/resources/images/building8.png");
+
+    FloorPlan fp = FloorPlan(m_grid_size, filepaths.size(), maxHeight);
+    m_buildings = fp.buildings;
+    m_building_vbos.clear();
+    m_building_vaos.clear();
+    for(int i = 0; i < m_buildings.size(); i++){
+        GLuint currVBO;
+        GLuint currVAO;
+        setupVBOVAO(&currVBO, &currVAO, m_buildings[i].getMesh());
+        m_building_vbos.push_back(currVBO);
+        m_building_vaos.push_back(currVAO);
+    }
+}
+
 void Realtime::paintGL() {
     // Students: anything requiring OpenGL calls every frame should be done here
 
@@ -163,13 +192,6 @@ void Realtime::paintGL() {
 
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "view"), 1, GL_FALSE, &m_camera.getViewMatrix()[0][0]);
     glUniformMatrix4fv(glGetUniformLocation(m_phong_shader, "proj"), 1, GL_FALSE, &m_camera.getProjMatrix()[0][0]);
-
-//    // simulating the moonlight
-//    glm::vec4 light1Direction = glm::vec4(1, -3, -2, 0);
-//    glm::vec4 light2Direction = glm::vec4(-1, -3, 2, 0);
-//    glm::vec4 light1Color = glm::vec4(1, 1, 1, 1);
-////    glm::vec4 light2Color = glm::vec4(0.2, 0.2, 0.2, 1);
-//    glm::vec4 light2Color = glm::vec4(0, 0.2, 0.2, 1);
 
     // moonlight
     glm::vec4 light1Direction = glm::vec4(-0.5, -1, -1, 0);
@@ -195,10 +217,10 @@ void Realtime::paintGL() {
     glUniform1i(glGetUniformLocation(m_phong_shader, "isShiny"), true);
     for (int i = 0; i < m_buildings.size(); i++) {
         Building building = m_buildings[i];
-        GLuint buildingVAO = m_vaos[i];
+        GLuint buildingVAO = m_building_vaos[i];
         glBindVertexArray(buildingVAO);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, textures[building.getTexture()]);
+        glBindTexture(GL_TEXTURE_2D, m_building_textures[building.getTexture()]);
         glDrawArrays(GL_TRIANGLES, 0, building.getMesh().size() / 8);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindVertexArray(0);
@@ -224,6 +246,11 @@ void Realtime::resizeGL(int w, int h) {
 void Realtime::settingsChanged() {
     if (!m_initializedGL) {
         return;
+    }
+
+    if (settings.maxHeight != m_lastMaxHeight) {
+        rebuildFloorplan(settings.maxHeight);
+        m_lastMaxHeight = settings.maxHeight;
     }
 
     update(); // asks for a PaintGL() call to occur

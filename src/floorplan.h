@@ -9,13 +9,12 @@ class FloorPlan {
     public:
         std::vector<Building> buildings;
         const float streetSize = 1.0f;
-        const int maxHeight = 10;
         const int maxBlockSize = 4;
         std::vector<int> blockSizesX;
         std::vector<int> blockSizesZ;
         int blockSize = 4;
 
-        FloorPlan(float gridSize, int numTextures) {
+        FloorPlan(float gridSize, int numTextures, int maxHeight) {
             blockSizesX.clear();
             blockSizesZ.clear();
             // randomly generate x dimension from 2-5
