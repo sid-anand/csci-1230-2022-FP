@@ -11,11 +11,12 @@ uniform vec4 cameraPos;
 
 uniform vec4 light1Direction;
 uniform vec4 light2Direction;
-uniform vec4 lightColor;
+uniform vec4 light1Color;
+uniform vec4 light2Color;
+uniform bool isShiny;
 
 void main() {
     vec4 ambientColor = vec4(0.2, 0.2, 0.2, 1.0);
-//    vec4 diffuseColor = vec4(0.5, 0.5, 0.5, 1.0);
     vec4 specularColor = vec4(1.0, 1.0, 1.0, 1.0);
     float shininess = 100;
 
@@ -32,19 +33,22 @@ void main() {
     float cosNormalLight1 = min(max(dot(normal, directionToLight1), 0.0), 1.0);
     float cosNormalLight2 = min(max(dot(normal, directionToLight2), 0.0), 1.0);
     vec4 textureDiffuseColor = texture(texture1, uv);
-    fragColor += lightColor * textureDiffuseColor * min(max(dot(normal, directionToLight1), 0.0), 1.0);
-    fragColor += lightColor * textureDiffuseColor * min(max(dot(normal, directionToLight2), 0.0), 1.0);
+    fragColor += light1Color * textureDiffuseColor * min(max(dot(normal, directionToLight1), 0.0), 1.0);
+    fragColor += light2Color * textureDiffuseColor * min(max(dot(normal, directionToLight2), 0.0), 1.0);
 
     // specular term
-    vec3 reflectionDirection1 = reflect(-directionToLight1, normal);
-    vec3 reflectionDirection2 = reflect(-directionToLight2, normal);
-    vec3 directionToCamera = normalize(vec3(cameraPos) - worldPosition);
-    if (shininess <= 0) {
-        fragColor += lightColor * specularColor;
-    } else {
-        float cosReflectionCamera1 = min(max(dot(reflectionDirection1, directionToCamera), 0.0), 1.0);
-        float cosReflectionCamera2 = min(max(dot(reflectionDirection2, directionToCamera), 0.0), 1.0);
-        fragColor += lightColor * specularColor * pow(cosReflectionCamera1, shininess);
-        fragColor += lightColor * specularColor * pow(cosReflectionCamera2, shininess);
+    if (isShiny) {
+        vec3 reflectionDirection1 = reflect(-directionToLight1, normal);
+        vec3 reflectionDirection2 = reflect(-directionToLight2, normal);
+        vec3 directionToCamera = normalize(vec3(cameraPos) - worldPosition);
+        if (shininess <= 0) {
+            fragColor += light1Color * specularColor;
+            fragColor += light2Color * specularColor;
+        } else {
+            float cosReflectionCamera1 = min(max(dot(reflectionDirection1, directionToCamera), 0.0), 1.0);
+            float cosReflectionCamera2 = min(max(dot(reflectionDirection2, directionToCamera), 0.0), 1.0);
+            fragColor += light1Color * specularColor * pow(cosReflectionCamera1, shininess);
+            fragColor += light2Color * specularColor * pow(cosReflectionCamera2, shininess);
+        }
     }
 }
