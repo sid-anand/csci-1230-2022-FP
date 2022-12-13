@@ -81,11 +81,12 @@ private:
     GLuint m_ground_vao;
     GLuint m_ground_texture;
 
-    int m_grid_size = 50;
+    int m_grid_size = 100;
 
     GLuint m_skybox_shader;
     GLuint m_skybox_vao, m_skybox_vbo, m_skybox_ebo;
     GLuint m_day_cubemap_texture, m_night_cubemap_texture;
 
     float m_distanceBezier;
+    float m_bezierTotal = 10.f;
 };

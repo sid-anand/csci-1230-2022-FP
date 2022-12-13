@@ -62,7 +62,7 @@ private:
 
     void generateDistanceLUT();
 
-    int m_distanceLUTSize = 20;
+    int m_distanceLUTSize = 50;
 
     std::vector<float> distanceLUT;
 };

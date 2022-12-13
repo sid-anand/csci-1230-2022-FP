@@ -135,7 +135,7 @@ void Realtime::initializeGL() {
     };
 
     m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
-    m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(20.f / 3.f, 5, 0), glm::vec3(40.f / 3.f, 5, 0), glm::vec3(20.f, 4, 0));
+    m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(m_bezierTotal / 3.f, 5, 0), glm::vec3(m_bezierTotal * 2.f / 3.f, 5, 0), glm::vec3(m_bezierTotal, 4, 0));
     m_distanceBezier = 0;
 }
 
@@ -432,7 +432,7 @@ void Realtime::timerEvent(QTimerEvent *event) {
         m_distanceBezier += deltaTime / 5.f;
         if (m_distanceBezier > 1) {
             m_distanceBezier = 0;
-            m_camera.updateBezierPoints(20);
+            m_camera.updateBezierPoints(m_bezierTotal);
         }
         m_camera.moveAlongBezierCurve(m_distanceBezier);
     }
