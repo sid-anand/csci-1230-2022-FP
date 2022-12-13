@@ -181,7 +181,6 @@ void Camera::updateBezierPoints(float nextBlock) {
     glm::vec3 newBezier1 = m_bezierPoint4;
     glm::vec3 newBezier2 = 2.f * m_bezierPoint4 - m_bezierPoint3;
 
-    // say it's 6, then we want 6/10 to go down and 4/10 to go up
     float originalY = newBezier1[1];
     bool goUp;
     if (originalY >= maxHeight) {
@@ -193,10 +192,8 @@ void Camera::updateBezierPoints(float nextBlock) {
     float newBezier4Y = originalY;
     float yDifference;
     if (goUp) {
-//        std::cout<< "going up!" <<std::endl;
         yDifference = 0.5f;
     } else {
-//        std::cout<< "going down!" <<std::endl;
         yDifference = -0.5f;
     }
     newBezier4Y += yDifference;
@@ -205,9 +202,6 @@ void Camera::updateBezierPoints(float nextBlock) {
 
     float newBezier4Z = z;
 
-    // Say there's 4.5 btw blocks
-    // int() rounds down
-    // then 0.5, 1.5, 2.5, 3.5
     float xDifference1 = (nextBlock / 3.f);
 
     float newBezier3X = newBezier4X - xDifference1;

@@ -89,4 +89,7 @@ private:
 
     float m_distanceBezier;
     float m_bezierTotal = 10.f;
+    std::vector<int> blockSizesX;
+    std::vector<int> blockSizesZ;
+    int blockSizesXIndex = 0;
 };

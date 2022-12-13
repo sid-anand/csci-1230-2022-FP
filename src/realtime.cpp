@@ -113,6 +113,9 @@ void Realtime::initializeGL() {
 
     FloorPlan fp = FloorPlan(m_grid_size, filepaths.size());
     m_buildings = fp.buildings;
+    blockSizesX = fp.blockSizesX;
+    blockSizesZ = fp.blockSizesZ;
+
     for(int i = 0; i < m_buildings.size(); i++){
         GLuint currVBO;
         GLuint currVAO;
@@ -135,7 +138,12 @@ void Realtime::initializeGL() {
     };
 
     m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
-    m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(m_bezierTotal / 3.f, 5, 0), glm::vec3(m_bezierTotal * 2.f / 3.f, 5, 0), glm::vec3(m_bezierTotal, 4, 0));
+    float totalX = 0;
+    for (int i = 0; i < 5; i++) {
+        totalX += blockSizesX[blockSizesXIndex];
+        blockSizesXIndex += 1;
+    }
+    m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(totalX / 3.f, 5, 0), glm::vec3(totalX * 2.f / 3.f, 5, 0), glm::vec3(totalX, 4, 0));
     m_distanceBezier = 0;
 }
 
@@ -445,7 +453,13 @@ void Realtime::timerEvent(QTimerEvent *event) {
         m_distanceBezier += deltaTime / 5.f;
         if (m_distanceBezier > 1) {
             m_distanceBezier = 0;
-            m_camera.updateBezierPoints(m_bezierTotal);
+            float totalX = 0;
+            for (int i = 0; i < 5; i++) {
+                totalX += blockSizesX[blockSizesXIndex];
+                blockSizesXIndex += 1;
+            }
+            std::cout<< "next bezier curve" <<std::endl;
+            m_camera.updateBezierPoints(totalX);
         }
         m_camera.moveAlongBezierCurve(m_distanceBezier);
     }
