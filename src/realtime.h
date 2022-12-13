@@ -62,6 +62,7 @@ private:
     void setupSkybox();
     void createCubemapTextureFromImages(GLuint *texture, std::vector<std::string> filepaths);
     void drawSkybox();
+    void rebuildFloorplan(int maxHeight);
 
     RenderData m_renderData;
     Camera m_camera;
@@ -71,11 +72,10 @@ private:
     bool m_loadedScene = false;
 
     QImage m_image;
-    GLuint m_texture;
     std::vector<Building> m_buildings;
-    std::vector<GLuint> m_vbos;
-    std::vector<GLuint> m_vaos;
-    std::vector<GLuint> textures;
+    std::vector<GLuint> m_building_vbos;
+    std::vector<GLuint> m_building_vaos;
+    std::vector<GLuint> m_building_textures;
     Ground m_ground;
     GLuint m_ground_vbo;
     GLuint m_ground_vao;
@@ -89,4 +89,6 @@ private:
 
     float m_distanceBezier;
     float m_bezierTotal = 10.f;
+
+    int m_lastMaxHeight = 10;
 };
