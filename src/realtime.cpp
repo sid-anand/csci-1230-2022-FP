@@ -139,12 +139,18 @@ void Realtime::initializeGL() {
 
     m_camera = Camera(size().width(), size().height(), m_renderData.cameraData, 0.1f, 100.f);
     float totalX = 0;
+    float startingX = 0;
+    float startingZ = 0;
+    blockSizesXIndex = 5;
+    blockSizesZIndex = 5;
     for (int i = 0; i < 5; i++) {
         totalX += blockSizesX[blockSizesXIndex];
         blockSizesXIndex += 1;
+        startingX += (blockSizesX[i] + 1);
+        startingZ -= (blockSizesZ[i] + 1);
     }
     goingForwardX = true;
-    m_camera.setBezierPoints(glm::vec3(0, 6, 0), glm::vec3(totalX / 3.f, 5, 0), glm::vec3(totalX * 2.f / 3.f, 5, 0), glm::vec3(totalX, 4, 0));
+    m_camera.setBezierPoints(glm::vec3(startingX, 6, startingZ), glm::vec3(totalX / 3.f + startingX, 5, startingZ), glm::vec3(totalX * 2.f / 3.f + startingX, 5, startingZ), glm::vec3(totalX + startingX, 4, startingZ));
     m_distanceBezier = 0;
 }
 
@@ -453,16 +459,15 @@ void Realtime::timerEvent(QTimerEvent *event) {
     } else if (m_keyMap[Qt::Key_G]) {
         m_distanceBezier += deltaTime / 5.f;
         if (m_distanceBezier > 1) {
-            std::cout<< "next bezier curve" <<std::endl;
             m_distanceBezier = 0;
-            if (blockSizesXIndex > 9 && goingForwardX == true) {
-                std::cout<< "turning to go backwards" <<std::endl;
-                float zChange = blockSizesZ[0];
+            if (blockSizesXIndex > 14 && goingForwardX == true) {
+                float zChange = blockSizesZ[blockSizesZIndex] + 1.0;
+                blockSizesZIndex += 1;
                 m_camera.updateBezierPoints(zChange, true);
                 goingForwardX = false;
-            } else if (blockSizesXIndex == -1 && goingForwardX == false) {
-                std::cout<< "turning to go forwards" <<std::endl;
-                float zChange = blockSizesZ[1];
+            } else if (blockSizesXIndex < 6 && goingForwardX == false) {
+                float zChange = blockSizesZ[blockSizesZIndex] + 1.0;
+                blockSizesZIndex += 1;
                 m_camera.updateBezierPoints(zChange, true);
                 goingForwardX = true;
             } else {
@@ -479,6 +484,7 @@ void Realtime::timerEvent(QTimerEvent *event) {
             }
         }
         m_camera.moveAlongBezierCurve(m_distanceBezier);
+
     }
 
     update(); // asks for a PaintGL() call to occur

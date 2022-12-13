@@ -227,22 +227,22 @@ void Camera::updateBezierPoints(float nextBlock, bool isTurning) {
 
         newBezier3 = glm::vec3(newBezier3X, newBezier3Y, newBezier3Z);
         newBezier4 = glm::vec3(newBezier4X, newBezier4Y, newBezier4Z);
-        isGoingForwardX = false;
+        isGoingForwardX = !isGoingForwardX;
 
     }
-    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
-    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
-    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
-    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
 
     m_bezierPoint1 = newBezier1;
     m_bezierPoint2 = newBezier2;
     m_bezierPoint3 = newBezier3;
     m_bezierPoint4 = newBezier4;
 
-    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
-    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
-    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
-    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint1[0]) + ", " + std::to_string(m_bezierPoint1[1]) + ", " + std::to_string(m_bezierPoint1[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint2[0]) + ", " + std::to_string(m_bezierPoint2[1]) + ", " + std::to_string(m_bezierPoint2[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint3[0]) + ", " + std::to_string(m_bezierPoint3[1]) + ", " + std::to_string(m_bezierPoint3[2]) <<std::endl;
+//    std::cout<< std::to_string(m_bezierPoint4[0]) + ", " + std::to_string(m_bezierPoint4[1]) + ", " + std::to_string(m_bezierPoint4[2]) <<std::endl;
 
 }
